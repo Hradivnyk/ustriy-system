@@ -33,13 +33,9 @@ export default tseslint.config(
     },
     languageOptions: {
       parserOptions: {
-        projectService: {
-          // Automatically finds the nearest tsconfig.json per file.
-          // E2e test files live outside src/ and use tsconfig.e2e.json —
-          // allowDefaultProject lets the project service handle them via defaultProject.
-          allowDefaultProject: ['apps/backend/test/*.ts'],
-          defaultProject: 'apps/backend/tsconfig.e2e.json',
-        },
+        // Automatically finds the nearest tsconfig.json per file.
+        // test/ files are covered by apps/backend/test/tsconfig.json → tsconfig.e2e.json
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
