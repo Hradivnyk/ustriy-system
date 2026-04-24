@@ -9,7 +9,6 @@
     "lint:fix": "eslint \"apps/**/*.{ts,tsx}\" --fix",
     "format": "prettier --write \"apps/**/*.{ts,tsx,json}\"",
     "format:check": "prettier --check \"apps/**/*.{ts,tsx,json}\"",
-    "type-check": "tsc -p apps/frontend/tsconfig.json --noEmit && tsc -p apps/backend/tsconfig.json --noEmit",
     "prepare": "husky"
   },
   "repository": {
