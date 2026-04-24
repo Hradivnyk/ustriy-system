@@ -23,8 +23,8 @@
     // Required for SWC and per-file transpilation tools
     "isolatedModules": true,
 
-    // Path aliases root (add paths here when needed)
-    "baseUrl": "./"
+    // Explicit Node.js globals (process, Buffer, etc.) — required with module: nodenext
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]

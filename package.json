@@ -7,10 +7,12 @@
   "scripts": {
     "dev:frontend": "npm run dev --prefix apps/frontend -- --port 3001",
     "dev:backend": "npm run start:dev --prefix apps/backend",
+    "type-check": "tsc -p apps/frontend/tsconfig.json --noEmit && tsc -p apps/backend/tsconfig.json --noEmit",
     "lint": "eslint \"apps/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"apps/**/*.{ts,tsx}\" --fix",
     "format": "prettier --write \"apps/**/*.{ts,tsx,json}\"",
     "format:check": "prettier --check \"apps/**/*.{ts,tsx,json}\"",
+    "test": "npm run test --prefix apps/backend",
     "prepare": "husky"
   },
   "repository": {
