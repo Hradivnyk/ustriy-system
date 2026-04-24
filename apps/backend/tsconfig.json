@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // NestJS: required for decorator-based DI and metadata reflection
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    // Node.js ESM module system
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+
+    // Compile target: align with Node.js LTS (>=20)
+    "target": "ES2023",
+
+    // Output
+    "outDir": "./dist",
+    "sourceMap": true,
+    "declaration": true,
+    "removeComments": true,
+    "incremental": true,
+
+    // Required for SWC and per-file transpilation tools
+    "isolatedModules": true,
+
+    // Path aliases root (add paths here when needed)
+    "baseUrl": "./"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+}
