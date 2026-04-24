@@ -90,6 +90,7 @@ export default tseslint.config(
     },
     settings: {
       react: { version: 'detect' },
+      next: { rootDir: 'apps/frontend' },
     },
     rules: {
       // React core

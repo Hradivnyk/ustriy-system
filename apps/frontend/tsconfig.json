@@ -1,0 +1,50 @@
+{
+  "compilerOptions": {
+    // ── From tsconfig.base.json ───────────────────────────────────────────────
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+
+    // ── Next.js: compilation is handled by SWC/Turbopack, tsc only type-checks
+    "noEmit": true,
+
+    // ── Browser environment ───────────────────────────────────────────────────
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+
+    // ── Module system: bundler mode for Webpack / Turbopack ───────────────────
+    "module": "esnext",
+    "moduleResolution": "bundler",
+
+    // ── JSX: React 17+ automatic transform (no `import React` needed) ─────────
+    "jsx": "react-jsx",
+
+    // ── Allow .js files alongside .ts ────────────────────────────────────────
+    "allowJs": true,
+
+    // ── Required for SWC per-file compilation ─────────────────────────────────
+    "isolatedModules": true,
+
+    // ── Faster incremental type-checking ─────────────────────────────────────
+    "incremental": true,
+
+    // ── Next.js TS plugin: IDE type checking for App Router conventions ───────
+    "plugins": [{ "name": "next" }],
+
+    // ── Path alias: `@/components/...` instead of `../../components/...` ──────
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.mts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
