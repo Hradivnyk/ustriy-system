@@ -13,7 +13,10 @@
     "format": "prettier --write \"apps/**/*.{ts,tsx,json}\"",
     "format:check": "prettier --check \"apps/**/*.{ts,tsx,json}\"",
     "test": "npm run test --prefix apps/backend",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:prod": "docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d"
   },
   "repository": {
     "type": "git",

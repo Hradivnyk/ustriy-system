@@ -1,8 +1,16 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS deps
 
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
+
+FROM deps AS dev
+
+COPY . .
+CMD ["npm", "run", "start:dev"]
+
+FROM deps AS builder
+
 COPY . .
 RUN npm run build
 
