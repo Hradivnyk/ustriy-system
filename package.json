@@ -1,0 +1,38 @@
+{
+  "name": "ustriy-system",
+  "version": "1.0.0",
+  "description": "Платформа для подачі та обробки заявок на ремонт у студентських кампусах.  \r Студенти подають заявки через вебінтерфейс, адміністратори керують ними через адмін-панель, а сповіщення надходять через Telegram-бот.",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/sholudyvyy-group/ustriy-system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://gitlab.com/sholudyvyy-group/ustriy-system/issues"
+  },
+  "homepage": "https://gitlab.com/sholudyvyy-group/ustriy-system#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@next/eslint-plugin-next": "^16.2.4",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-security": "^4.0.0",
+    "globals": "^17.5.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.0"
+  }
+}
