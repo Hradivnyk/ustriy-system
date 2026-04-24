@@ -5,7 +5,12 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint \"apps/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"apps/**/*.{ts,tsx}\" --fix",
+    "format": "prettier --write \"apps/**/*.{ts,tsx,json}\"",
+    "format:check": "prettier --check \"apps/**/*.{ts,tsx,json}\"",
+    "type-check": "tsc -p apps/frontend/tsconfig.json --noEmit && tsc -p apps/backend/tsconfig.json --noEmit",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -31,8 +36,19 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-security": "^4.0.0",
     "globals": "^17.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.0"
+  },
+  "lint-staged": {
+    "apps/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "apps/**/*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }

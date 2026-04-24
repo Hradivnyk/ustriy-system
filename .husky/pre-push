@@ -1,0 +1,11 @@
+echo "▶ Type check..."
+npm run type-check
+
+echo "▶ Lint..."
+npm run lint
+
+echo "▶ Format check..."
+npm run format:check
+
+echo "▶ Tests..."
+npm test
