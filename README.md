@@ -116,7 +116,6 @@ cp .env.example .env
 - `APP_URL` — `https://yourdomain.com`
 - `FRONTEND_URL` — `https://yourdomain.com`
 - `GOOGLE_CALLBACK_URL` — `https://yourdomain.com/api/auth/google/callback`
-- `TELEGRAM_WEBHOOK_URL` — `https://yourdomain.com/telegram/webhook`
 
 ### 3. Налаштування домену
 
