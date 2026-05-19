@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Фронтенд — адмін-панель Ustriy
 
-## Getting Started
+Адмін-панель на Next.js 16 для керування заявками на ремонт у студентському містечку. Порт **3001**.
 
-First, run the development server:
+## Стек
+
+- Next.js 16 (App Router)
+- React 19
+- Ant Design 6
+- TypeScript 5
+
+## Запуск
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # dev-сервер на :3001
+npm run build
+npm run start
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+З кореня монорепозиторію: `npm run dev:frontend`, `npm run type-check`, `npm run lint`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Структура
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── (dashboard)/    # захищені маршрути адмін-панелі
+│   └── layout.tsx      # кореневий layout (AntdProvider)
+├── components/
+│   ├── layout/         # Header, Sidebar
+│   └── providers/      # AntdProvider
+├── lib/api/index.ts    # HTTP-клієнт — усі API-виклики лише через нього
+├── types/index.ts      # спільні типи (User, RepairRequest, RequestStatus)
+└── styles/globals.css
+```
 
-## Learn More
+## Ролі та доступ
 
-To learn more about Next.js, take a look at the following resources:
+Панель призначена для персоналу. Мешканці (`resident`) працюють через Telegram-бот і доступу до панелі не мають.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Роль         | Можливості в панелі                                                     |
+| ------------ | ----------------------------------------------------------------------- |
+| `specialist` | Перегляд та оновлення статусів призначених заявок                       |
+| `dispatcher` | Повний доступ: призначення фахівців, підтвердження орендарів, аналітика |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Змінні середовища
 
-## Deploy on Vercel
+- `NEXT_PUBLIC_API_URL` — базова URL backend (за замовчуванням `http://localhost:3000`; у продакшні — `https://yourdomain.com/api`)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Документація
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [CLAUDE.md](./CLAUDE.md) — правила для AI-асистентів
+- [docs/api.md](../../docs/api.md) — специфікація REST API
+- [docs/entities.md](../../docs/entities.md) — модель даних
