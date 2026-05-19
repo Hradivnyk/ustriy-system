@@ -68,6 +68,7 @@ tsconfig.tsbuildinfo
 docker-data/
 postgres-data/
 redis-data/
+docker-compose.override.yml
 
 # =============================================================
 # OS
