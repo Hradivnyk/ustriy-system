@@ -42,7 +42,7 @@ docker compose run --rm --entrypoint "" certbot sh -c "rm -rf '/etc/letsencrypt/
 
 # ─── Крок 5: Отримуємо справжній сертифікат від Let's Encrypt ───────────────
 echo ">>> Запитуємо сертифікат Let's Encrypt для $DOMAIN..."
-docker compose run --rm certbot certonly \
+docker compose run --rm --entrypoint "" certbot certbot certonly \
   --webroot \
   --webroot-path=/var/www/certbot \
   --email "$EMAIL" \
