@@ -175,6 +175,71 @@ docker compose -f docker-compose.yml up -d --build
 
 ---
 
+## CI/CD (GitLab)
+
+Пайплайн описаний у `.gitlab-ci.yml` і складається з чотирьох стейджів. Усі джоби lint/test/build використовують GitLab DAG (`needs: []`) — вони запускаються **паралельно**, не чекаючи один одного.
+
+### Схема пайплайну
+
+```
+┌─────────────────────────────────────────────────────┐
+│ lint (stage: lint, паралельно)                      │
+│  • lint             — ESLint + Prettier по всьому   │
+│  • typecheck:backend  — tsc для backend             │
+│  • typecheck:frontend — tsc для frontend            │
+└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│ test (stage: test, паралельно з lint)               │
+│  • test:backend — Jest unit-тести                   │
+└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│ build (stage: build, паралельно з усіма вище)       │
+│  • build:backend  → артефакт apps/backend/dist/     │
+│  • build:frontend → артефакт apps/frontend/.next/   │
+└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│ deploy (тільки при push до main)                    │
+│  • Чекає на всі 6 джобів вище                       │
+│  • SSH на VPS → git pull → docker compose up        │
+│  • Виконує міграції БД                              │
+└─────────────────────────────────────────────────────┘
+```
+
+**Тригери:**
+- Будь-який push до будь-якої гілки — запускає lint / test / build.
+- Push до `main` — додатково запускає `deploy`.
+- При відкритому MR — запускається пайплайн типу `merge_request_event`; дублюючий branch-пайплайн пригнічується.
+
+### GitLab CI/CD Variables
+
+Налаштовуються в **Settings → CI/CD → Variables**. Усі змінні повинні бути **Protected** + **Masked**.
+
+| Змінна | Опис | Як отримати |
+|--------|------|-------------|
+| `SSH_PRIVATE_KEY` | Ed25519 приватний ключ для deploy-користувача на VPS | `ssh-keygen -t ed25519 -C "gitlab-ci"` |
+| `SSH_KNOWN_HOSTS` | Відбиток хосту VPS | `ssh-keyscan -H $SSH_HOST` |
+| `SSH_HOST` | IP-адреса або домен VPS | — |
+| `SSH_USER` | Deploy-користувач на VPS (не root) | — |
+| `DEPLOY_PATH` | Абсолютний шлях до клону репозиторію на VPS | напр. `/opt/ustriy-system` |
+| `DEPLOY_DOMAIN` | Домен для GitLab Environments (необов'язково) | напр. `yourdomain.com` |
+
+#### Налаштування SSH-доступу на VPS
+
+```bash
+# 1. Згенерувати ключову пару (локально або в CI)
+ssh-keygen -t ed25519 -C "gitlab-ci" -f ~/.ssh/gitlab_deploy
+
+# 2. Додати публічний ключ до authorized_keys на VPS
+ssh-copy-id -i ~/.ssh/gitlab_deploy.pub $SSH_USER@$SSH_HOST
+
+# 3. Отримати SSH_KNOWN_HOSTS
+ssh-keyscan -H $SSH_HOST
+
+# 4. Вміст gitlab_deploy (приватний ключ) → змінна SSH_PRIVATE_KEY в GitLab
+```
+
+---
+
 ## Ліцензія
 
 MIT
