@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 import type { ConfigService } from '@nestjs/config';
 import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
@@ -19,5 +21,7 @@ export function createDatabaseConfig(
     autoLoadEntities: true,
     synchronize: config.get('TYPEORM_SYNCHRONIZE', { infer: true }),
     logging: config.get('TYPEORM_LOGGING', { infer: true }),
+    migrations: [path.join(__dirname, '../database/migrations/*{.ts,.js}')],
+    migrationsRun: config.get('TYPEORM_MIGRATIONS_RUN', { infer: true }),
   };
 }

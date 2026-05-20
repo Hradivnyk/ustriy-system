@@ -2,9 +2,10 @@ export type RequestStatus = 'pending' | 'in_progress' | 'resolved' | 'rejected';
 
 export interface User {
   id: string;
+  googleId?: string;
   name: string;
   email: string;
-  role: 'student' | 'admin';
+  role: 'resident' | 'specialist' | 'dispatcher';
 }
 
 export interface RepairRequest {

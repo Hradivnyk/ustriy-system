@@ -24,11 +24,12 @@ export const envSchema = z.object({
   DB_SSL: boolEnv(false),
   TYPEORM_SYNCHRONIZE: boolEnv(false),
   TYPEORM_LOGGING: boolEnv(false),
+  TYPEORM_MIGRATIONS_RUN: boolEnv(false),
 
   JWT_SECRET: z.string().min(32),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_SECRET: z.string().min(32),
-  JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+  JWT_REFRESH_EXPIRES_IN: z.string().default('30d'),
 
   TELEGRAM_BOT_TOKEN: z.string().optional(),
 
