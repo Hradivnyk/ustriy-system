@@ -1,0 +1,16 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+build
+.next
+.turbo
+out
+
+# Auto-generated files
+package-lock.json
+*.lock
+
+# Env files
+.env*
