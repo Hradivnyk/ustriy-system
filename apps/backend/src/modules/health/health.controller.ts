@@ -20,10 +20,12 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
-  check() {
+  check(): ReturnType<HealthCheckService['check']> {
     return this.health.check([
-      () => this.db.pingCheck('database'),
-      () => this.memory.checkHeap('memory_heap', 300 * 1024 * 1024),
+      (): ReturnType<TypeOrmHealthIndicator['pingCheck']> =>
+        this.db.pingCheck('database'),
+      (): ReturnType<MemoryHealthIndicator['checkHeap']> =>
+        this.memory.checkHeap('memory_heap', 300 * 1024 * 1024),
     ]);
   }
 }

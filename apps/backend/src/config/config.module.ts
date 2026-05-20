@@ -2,9 +2,9 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { type ZodIssue, ZodError } from 'zod';
 
-import { envSchema } from './env.schema';
+import { type AppEnv, envSchema } from './env.schema';
 
-function validate(config: Record<string, unknown>) {
+function validate(config: Record<string, unknown>): AppEnv {
   const result = envSchema.safeParse(config);
 
   if (!result.success) {
