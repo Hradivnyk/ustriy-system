@@ -1,93 +1,245 @@
-# ustriy-system
+# Ustriy — Система обліку заявок на ремонт
 
+Платформа для подачі та обробки заявок на ремонт у студентських кампусах.  
+Мешканці подають заявки через Telegram-бот, співробітники керують ними через веб-адмін-панель.
 
+---
 
-## Getting started
+## Можливості
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- Подача заявок на ремонт мешканцями через Telegram-бот
+- Миттєві Telegram-сповіщення мешканцю на кожному етапі зміни статусу
+- Система оцінки якості роботи фахівця після завершення заявки
+- Адмін-панель для диспетчерів і фахівців: перегляд, фільтрація, призначення та оновлення статусів
+- Email-сповіщення учасникам процесу
+- Автентифікація через Google OAuth та JWT; автоматична верифікація студентів за доменом університету
+- REST API з документацією Swagger
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## Стек
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+**Backend** — NestJS, TypeORM, PostgreSQL, Redis  
+**Frontend** — Next.js, Ant Design  
+**Auth** — Google OAuth 2.0, JWT  
+**Bot** — Telegraf (nestjs-telegraf)  
+**Infra** — Docker Compose, Nginx, Let's Encrypt, GitLab CI/CD
+
+---
+
+## Структура репозиторію
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/sholudyvyy-group/ustriy-system.git
-git branch -M main
-git push -uf origin main
+ustriy-system/
+├── apps/
+│   ├── backend/               # NestJS API
+│   └── frontend/              # Next.js адмін-панель
+├── docs/
+│   ├── api.md                 # специфікація REST API
+│   └── entities.md            # модель даних (сутності)
+├── nginx/
+│   └── nginx.conf             # Nginx конфіг (SSL, proxy, rate limiting)
+├── scripts/
+│   └── init-letsencrypt.sh    # Скрипт першого отримання SSL-сертифіката
+├── docker-compose.yml                  # Prod-конфігурація
+├── docker-compose.override.yml         # Локальний override (не в git)
+├── docker-compose.override.example.yml # Шаблон для локального override
+└── .env.example
 ```
 
-## Integrate with your tools
+---
 
-* [Set up project integrations](https://gitlab.com/sholudyvyy-group/ustriy-system/-/settings/integrations)
+## Документація
 
-## Collaborate with your team
+| Файл | Зміст |
+|------|--------|
+| [docs/entities.md](docs/entities.md) | Модель даних (сутності, зв'язки, enum) |
+| [docs/api.md](docs/api.md) | Специфікація REST API |
+| [apps/backend/CLAUDE.md](apps/backend/CLAUDE.md) | Правила для AI при роботі з backend |
+| [apps/frontend/CLAUDE.md](apps/frontend/CLAUDE.md) | Правила для AI при роботі з frontend |
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+---
 
-## Test and Deploy
+## Запуск локально (Docker)
 
-Use the built-in continuous integration in GitLab.
+Локальний запуск використовує багатоетапний Dockerfile з ціллю `dev`, який монтує вихідний код і запускає застосунки з гарячим перезавантаженням.
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+### 1. Змінні середовища
 
-***
+```bash
+cp .env.example .env
+```
 
-# Editing this README
+Відредагуй `.env`: задай паролі для БД та Redis, додай Google OAuth ключі тощо.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### 2. Docker Compose override
 
-## Suggestions for a good README
+Для локальної розробки потрібен файл `docker-compose.override.yml`, який перемикає сервіси на ціль `dev`, відкриває порти назовні та вимикає Nginx і Certbot.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```bash
+cp docker-compose.override.example.yml docker-compose.override.yml
+```
 
-## Name
-Choose a self-explaining name for your project.
+> `docker-compose.override.yml` не комітиться до репозиторію — при запуску `docker compose` Docker автоматично мерджить його з `docker-compose.yml`.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### 3. Запуск
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```bash
+docker compose up --build
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Після старту доступно:
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+| Сервіс   | URL                          |
+|----------|------------------------------|
+| Backend  | http://localhost:3000        |
+| Swagger  | http://localhost:3000/api/docs |
+| Frontend | http://localhost:3001        |
+| PostgreSQL | `localhost:5432`           |
+| Redis    | `localhost:6379`             |
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+> Nginx і Certbot у локальному режимі вимкнені через профіль `production-only`.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### Зупинка
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+```bash
+docker compose down          # зупинити контейнери
+docker compose down -v       # також видалити томи (БД, Redis)
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+---
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## Запуск production-версії
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+Продакшн-збірка використовує оптимізовані Docker-образи (ціль `production`) без монтування вихідного коду. Nginx проксує трафік і завершує SSL.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### 1. Підготовка сервера
 
-## License
-For open source projects, say how it is licensed.
+Потрібен Linux-сервер з встановленими `docker` та `docker compose`.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+### 2. Змінні середовища
+
+```bash
+cp .env.example .env
+```
+
+Обов'язково задай в `.env`:
+
+- `DB_PASSWORD`, `REDIS_PASSWORD` — надійні паролі
+- `JWT_SECRET`, `JWT_REFRESH_SECRET` — випадкові рядки (мінімум 32 символи)
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — ключі Google OAuth
+- `APP_URL` — `https://yourdomain.com`
+- `FRONTEND_URL` — `https://yourdomain.com`
+- `GOOGLE_CALLBACK_URL` — `https://yourdomain.com/api/auth/google/callback`
+
+### 3. Налаштування домену
+
+У `nginx/nginx.conf` заміни `YOUR_DOMAIN` на свій домен:
+
+```bash
+sed -i 's/YOUR_DOMAIN/yourdomain.com/g' nginx/nginx.conf
+```
+
+### 4. Отримання SSL-сертифіката (перший запуск)
+
+Скрипт автоматично вирішує проблему запуску Nginx без сертифіката:
+
+```bash
+DOMAIN=yourdomain.com EMAIL=your@email.com ./scripts/init-letsencrypt.sh
+```
+
+Скрипт:
+1. Створює тимчасовий self-signed сертифікат для старту Nginx
+2. Отримує справжній сертифікат від Let's Encrypt через ACME-перевірку
+3. Перезавантажує Nginx з реальним сертифікатом
+
+> Certbot-контейнер автоматично оновлює сертифікат кожні 12 годин.
+
+### 5. Запуск
+
+```bash
+docker compose up -d --build
+```
+
+> У production `docker-compose.override.yml` НЕ повинен бути присутній на сервері, або потрібно явно вказати лише основний файл:
+> ```bash
+> docker compose -f docker-compose.yml up -d --build
+> ```
+
+### Оновлення додатку
+
+```bash
+git pull
+docker compose -f docker-compose.yml up -d --build
+```
+
+---
+
+## CI/CD (GitLab)
+
+Пайплайн описаний у `.gitlab-ci.yml` і складається з чотирьох стейджів. Усі джоби lint/test/build використовують GitLab DAG (`needs: []`) — вони запускаються **паралельно**, не чекаючи один одного.
+
+### Схема пайплайну
+
+```
+┌─────────────────────────────────────────────────────┐
+│ lint (stage: lint, паралельно)                      │
+│  • lint             — ESLint + Prettier по всьому   │
+│  • typecheck:backend  — tsc для backend             │
+│  • typecheck:frontend — tsc для frontend            │
+└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│ test (stage: test, паралельно з lint)               │
+│  • test:backend — Jest unit-тести                   │
+└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│ build (stage: build, паралельно з усіма вище)       │
+│  • build:backend  → артефакт apps/backend/dist/     │
+│  • build:frontend → артефакт apps/frontend/.next/   │
+└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│ deploy (тільки при push до main)                    │
+│  • Чекає на всі 6 джобів вище                       │
+│  • SSH на VPS → git pull → docker compose up        │
+│  • Виконує міграції БД                              │
+└─────────────────────────────────────────────────────┘
+```
+
+**Тригери:**
+- Будь-який push до будь-якої гілки — запускає lint / test / build.
+- Push до `main` — додатково запускає `deploy`.
+- При відкритому MR — запускається пайплайн типу `merge_request_event`; дублюючий branch-пайплайн пригнічується.
+
+### GitLab CI/CD Variables
+
+Налаштовуються в **Settings → CI/CD → Variables**. Усі змінні повинні бути **Protected** + **Masked**.
+
+| Змінна | Опис | Як отримати |
+|--------|------|-------------|
+| `SSH_PRIVATE_KEY` | Ed25519 приватний ключ для deploy-користувача на VPS | `ssh-keygen -t ed25519 -C "gitlab-ci"` |
+| `SSH_KNOWN_HOSTS` | Відбиток хосту VPS | `ssh-keyscan -H $SSH_HOST` |
+| `SSH_HOST` | IP-адреса або домен VPS | — |
+| `SSH_USER` | Deploy-користувач на VPS (не root) | — |
+| `DEPLOY_PATH` | Абсолютний шлях до клону репозиторію на VPS | напр. `/opt/ustriy-system` |
+| `DEPLOY_DOMAIN` | Домен для GitLab Environments (необов'язково) | напр. `yourdomain.com` |
+
+#### Налаштування SSH-доступу на VPS
+
+```bash
+# 1. Згенерувати ключову пару (локально або в CI)
+ssh-keygen -t ed25519 -C "gitlab-ci" -f ~/.ssh/gitlab_deploy
+
+# 2. Додати публічний ключ до authorized_keys на VPS
+ssh-copy-id -i ~/.ssh/gitlab_deploy.pub $SSH_USER@$SSH_HOST
+
+# 3. Отримати SSH_KNOWN_HOSTS
+ssh-keyscan -H $SSH_HOST
+
+# 4. Вміст gitlab_deploy (приватний ключ) → змінна SSH_PRIVATE_KEY в GitLab
+```
+
+---
+
+## Ліцензія
+
+MIT
