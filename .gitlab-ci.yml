@@ -159,6 +159,9 @@ deploy:
     - echo "KEY file path = $SSH_PRIVATE_KEY"
     - ls -la "$SSH_PRIVATE_KEY"
     - cat "$SSH_PRIVATE_KEY" | head -1
+    - cat "$SSH_PRIVATE_KEY" | wc -l
+    - tail -3 "$SSH_PRIVATE_KEY"
+    - cat -A "$SSH_PRIVATE_KEY" | tail -3
     - chmod 600 "$SSH_PRIVATE_KEY"
     - ssh-add "$SSH_PRIVATE_KEY"
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
