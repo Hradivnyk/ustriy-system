@@ -34,13 +34,20 @@ docker compose run --rm --entrypoint "" certbot sh -c "
 # ─── Крок 3: Запускаємо nginx з тимчасовим сертифікатом ──────────────────────
 echo ">>> Запускаємо nginx..."
 docker compose up -d nginx
-sleep 3
+sleep 5
 
-# ─── Крок 4: Видаляємо тимчасовий сертифікат ────────────────────────────────
+# ─── Крок 4: Вимикаємо автоперезапуск nginx на час отримання сертифіката ────
+# Після видалення temp cert Docker міг би перезапустити nginx (без сертифіката
+# nginx упаде). Вимикаємо це на час роботи certbot.
+NGINX_ID=$(docker compose ps -q nginx)
+docker update --restart=no "$NGINX_ID"
+
+# ─── Крок 5: Видаляємо тимчасовий сертифікат ────────────────────────────────
+# nginx тримає cert в пам'яті — продовжує слухати порт 80 для ACME-challenge
 echo ">>> Видаляємо тимчасовий сертифікат..."
-docker compose run --rm --entrypoint "" certbot sh -c "rm -rf '/etc/letsencrypt/live/$DOMAIN'"
+docker compose run --rm --entrypoint "" certbot sh -c "rm -rf '$CERT_PATH'"
 
-# ─── Крок 5: Отримуємо справжній сертифікат від Let's Encrypt ───────────────
+# ─── Крок 6: Отримуємо справжній сертифікат від Let's Encrypt ───────────────
 echo ">>> Запитуємо сертифікат Let's Encrypt для $DOMAIN..."
 docker compose run --rm --entrypoint "" certbot certbot certonly \
   --webroot \
@@ -50,7 +57,9 @@ docker compose run --rm --entrypoint "" certbot certbot certonly \
   --no-eff-email \
   -d "$DOMAIN"
 
-# ─── Крок 6: Перезавантажуємо nginx з реальним сертифікатом ─────────────────
+# ─── Крок 7: Відновлюємо автоперезапуск і перезавантажуємо nginx ─────────────
+docker update --restart=unless-stopped "$NGINX_ID"
+
 echo ">>> Перезавантажуємо nginx..."
 docker compose exec nginx nginx -s reload
 
