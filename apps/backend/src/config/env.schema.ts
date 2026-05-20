@@ -2,9 +2,7 @@ import { z } from 'zod';
 
 // z.coerce.boolean() treats any non-empty string as true — '0'/'false' become true.
 // This helper correctly parses env string booleans.
-const boolEnv = (
-  defaultValue = false,
-): z.ZodEffects<z.ZodBoolean, boolean, unknown> =>
+const boolEnv = (defaultValue = false): z.ZodType<boolean> =>
   z.preprocess((val): boolean => {
     if (val === undefined || val === null) return defaultValue;
     if (typeof val === 'boolean') return val;
