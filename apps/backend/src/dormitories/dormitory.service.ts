@@ -35,14 +35,12 @@ export class DormitoriesService implements OnApplicationBootstrap {
   }
 
   private async seedDefaults(): Promise<void> {
-    for (const number of DORMITORY_NUMBERS) {
-      await this.dormitoryRepository
-        .createQueryBuilder()
-        .insert()
-        .into(Dormitory)
-        .values({ number, isActive: true })
-        .orIgnore()
-        .execute();
-    }
+    await this.dormitoryRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Dormitory)
+      .values(DORMITORY_NUMBERS.map((number) => ({ number, isActive: true })))
+      .orIgnore()
+      .execute();
   }
 }
