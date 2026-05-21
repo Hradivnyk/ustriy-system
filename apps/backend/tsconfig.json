@@ -5,10 +5,17 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
 
-    // Node.js ESM module system
+    // Explicitly set here because ../../tsconfig.base.json is not present inside Docker
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+
+    // nodenext: required for Zod v4 .cts files; resolvePackageJsonExports disabled for nestjs-telegraf
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "resolvePackageJsonExports": true,
+    "resolvePackageJsonExports": false,
 
     // Compile target: align with Node.js LTS (>=20)
     "target": "ES2023",
@@ -23,7 +30,6 @@
     // Required for SWC and per-file transpilation tools
     "isolatedModules": true,
 
-    // Explicit Node.js globals (process, Buffer, etc.) — required with module: nodenext
     "types": ["node", "jest"]
   },
   "include": ["src/**/*"],

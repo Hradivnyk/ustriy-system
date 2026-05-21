@@ -32,6 +32,15 @@ export const envSchema = z.object({
 
   TELEGRAM_BOT_TOKEN: z.string().optional(),
 
+  UNIVERSITY_EMAIL_DOMAIN: z
+    .string()
+    .regex(/^@.+\..+$/, 'Must start with @ (e.g. @kpi.ua)'),
+  MAIL_HOST: z.string().optional(),
+  MAIL_PORT: z.coerce.number().int().positive().default(587),
+  MAIL_USER: z.string().optional(),
+  MAIL_PASS: z.string().optional(),
+  MAIL_FROM: z.string().optional(),
+
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   GOOGLE_CALLBACK_URL: z.string().url().optional(),
