@@ -5,11 +5,18 @@ const PUBLIC_PREFIXES = ['/login', '/auth/'];
 
 export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
+  const isAuthenticated = request.cookies.has('access_token');
 
   const isPublic = PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-  if (isPublic) return NextResponse.next();
 
-  if (!request.cookies.has('access_token')) {
+  if (isPublic) {
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return NextResponse.next();
+  }
+
+  if (!isAuthenticated) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

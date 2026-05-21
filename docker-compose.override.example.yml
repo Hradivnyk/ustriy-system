@@ -8,6 +8,8 @@ services:
       - ./apps/backend/src:/app/src
     environment:
       - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=1000
     restart: "no"
 
   frontend:
@@ -17,6 +19,10 @@ services:
       - '3001:3001'
     volumes:
       - ./apps/frontend/src:/app/src
+    environment:
+      - NEXT_NO_TURBOPACK=1
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
     restart: "no"
 
   postgres:
