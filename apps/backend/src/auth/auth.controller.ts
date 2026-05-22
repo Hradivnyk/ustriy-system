@@ -3,6 +3,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Next,
   Post,
   Req,
@@ -30,6 +31,8 @@ interface RequestWithUser extends Request {
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly authService: AuthService,
     private readonly config: ConfigService<AppEnv, true>,
@@ -55,6 +58,10 @@ export class AuthController {
       'google',
       (err: Error | null, staff: Staff | null) => {
         if (err || !staff) {
+          this.logger.error('Google OAuth failed', {
+            error: err?.message ?? err,
+            hasStaff: !!staff,
+          });
           return res.redirect(`${frontendUrl}/auth/login?error=oauth_failed`);
         }
         const tokens = this.authService.generateTokens(staff.id);
