@@ -16,8 +16,8 @@ export class Staff {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ unique: true })
-  googleId!: string;
+  @Column({ unique: true, nullable: true })
+  googleId!: string | null;
 
   @Column()
   name!: string;
