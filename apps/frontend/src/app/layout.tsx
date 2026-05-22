@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import AntdProvider from '@/components/providers/AntdProvider';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import '@/styles/globals.css';
 
 const geistSans = Geist({
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="uk" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <AntdProvider>{children}</AntdProvider>
+        <ThemeProvider>
+          <AntdProvider>{children}</AntdProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

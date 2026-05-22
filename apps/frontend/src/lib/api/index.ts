@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 
 type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown;
@@ -9,6 +9,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...rest,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...headers,
@@ -20,7 +21,8 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new Error(`API error: ${response.status} ${response.statusText}`);
   }
 
-  return response.json() as Promise<T>;
+  const text = await response.text();
+  return (text ? JSON.parse(text) : null) as T;
 }
 
 export const api = {

@@ -1,25 +1,41 @@
 'use client';
 
 import { AntdRegistry } from '@ant-design/nextjs-registry';
-import { ConfigProvider, App } from 'antd';
+import { App, ConfigProvider, theme } from 'antd';
 import ukUA from 'antd/locale/uk_UA';
 
-const THEME = {
-  token: {
-    colorPrimary: '#1677ff',
-    borderRadius: 8,
-    fontFamily: 'var(--font-geist-sans), Arial, sans-serif',
-  },
-} as const;
+import { useTheme } from './ThemeProvider';
 
 export default function AntdProvider({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>): React.JSX.Element {
+  const { mode } = useTheme();
+
   return (
     <AntdRegistry>
-      <ConfigProvider locale={ukUA} theme={THEME}>
+      <ConfigProvider
+        locale={ukUA}
+        theme={{
+          algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
+          token: {
+            colorPrimary: '#1677ff',
+            borderRadius: 6,
+            fontFamily:
+              'var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+          },
+          components: {
+            Layout: {
+              headerBg: mode === 'dark' ? '#1f1f1f' : '#f0f2f5',
+              siderBg: mode === 'dark' ? '#1f1f1f' : '#f0f2f5',
+            },
+            Menu: {
+              itemBg: mode === 'dark' ? '#1f1f1f' : '#f0f2f5',
+            },
+          },
+        }}
+      >
         <App>{children}</App>
       </ConfigProvider>
     </AntdRegistry>
