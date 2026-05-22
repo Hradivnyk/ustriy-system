@@ -21,14 +21,17 @@ export default function AntdProvider({
           algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
           token: {
             colorPrimary: '#1677ff',
-            colorTextBase: '#141414',
             borderRadius: 6,
             fontFamily:
               'var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
           },
           components: {
             Layout: {
-              headerBg: mode === 'dark' ? '#1f1f1f' : '#ffffff',
+              headerBg: mode === 'dark' ? '#1f1f1f' : '#f0f2f5',
+              siderBg: mode === 'dark' ? '#1f1f1f' : '#f0f2f5',
+            },
+            Menu: {
+              itemBg: mode === 'dark' ? '#1f1f1f' : '#f0f2f5',
             },
           },
         }}
