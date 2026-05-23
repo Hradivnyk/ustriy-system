@@ -3,6 +3,7 @@ import { Ctx, Wizard, WizardStep } from 'nestjs-telegraf';
 import { Markup } from 'telegraf';
 
 import type { BotContext } from '../bot.context';
+import { SUBMIT_TICKET_SCENE_ID } from '../submit-ticket/submit-ticket.wizard';
 
 export const MAIN_MENU_SCENE_ID = 'main-menu';
 
@@ -15,7 +16,6 @@ const MENU_KEYBOARD = Markup.inlineKeyboard([
 ]);
 
 const STUB_RESPONSES: Record<string, string> = {
-  'menu:submit-ticket': '📝 Функція подачі заявки поки недоступна.',
   'menu:active-tickets':
     '🔧 Функція перегляду активних заявок поки недоступна.',
   'menu:ticket-history': '🗂 Функція перегляду історії заявок поки недоступна.',
@@ -35,8 +35,14 @@ export class MainMenuWizard {
     await ctx.answerCbQuery();
 
     const action = ctx.callbackQuery.data as string;
-    const stubMessage = STUB_RESPONSES[action];
 
+    if (action === 'menu:submit-ticket') {
+      await ctx.scene.leave();
+      await ctx.scene.enter(SUBMIT_TICKET_SCENE_ID);
+      return;
+    }
+
+    const stubMessage = STUB_RESPONSES[action];
     if (stubMessage) {
       await ctx.reply(stubMessage);
     }
