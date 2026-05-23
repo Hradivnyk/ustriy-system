@@ -10,7 +10,7 @@ import { MAIN_MENU_SCENE_ID } from '../main-menu/main-menu.wizard';
 import { answerCbQuery } from '../utils/answer-cb-query';
 import { editMessageText } from '../utils/edit-message-text';
 
-export const ACTIVE_TICKETS_SCENE_ID = 'active-tickets';
+export const TICKET_HISTORY_SCENE_ID = 'ticket-history';
 
 const BACK_CB = 'back:main-menu';
 const PREV_CB = 'page:prev';
@@ -43,7 +43,7 @@ function buildNavKeyboard(index: number, total: number) {
 
 function formatTicket(ticket: Ticket, index: number, total: number): string {
   return (
-    `🔧 <b>Активні заявки — заявка ${index + 1} з ${total}</b>\n\n` +
+    `🗂 <b>Історія заявок — заявка ${index + 1} з ${total}</b>\n\n` +
     `📋 Номер заявки: #${ticket.ticketNumber}\n` +
     `📅 Дата створення: ${formatDate(ticket.createdAt)}\n` +
     `👨‍🔧 Фахівець: ${ticket.specialist?.name ?? '—'}\n` +
@@ -52,9 +52,9 @@ function formatTicket(ticket: Ticket, index: number, total: number): string {
   );
 }
 
-@Wizard(ACTIVE_TICKETS_SCENE_ID)
+@Wizard(TICKET_HISTORY_SCENE_ID)
 @Injectable()
-export class ActiveTicketsWizard {
+export class TicketHistoryWizard {
   constructor(
     private readonly ticketsService: TicketsService,
     private readonly residentsService: ResidentsService,
@@ -95,16 +95,16 @@ export class ActiveTicketsWizard {
     ]);
 
     if (!residentData) {
-      await editMessageText(ctx, 'У вас немає активних заявок.', backOnly);
+      await editMessageText(ctx, 'У вас ще немає жодної заявки.', backOnly);
       return;
     }
 
-    const tickets = await this.ticketsService.findActiveByResident(
+    const tickets = await this.ticketsService.findAllByResident(
       residentData.resident.id,
     );
 
     if (tickets.length === 0) {
-      await editMessageText(ctx, 'У вас немає активних заявок.', backOnly);
+      await editMessageText(ctx, 'У вас ще немає жодної заявки.', backOnly);
       return;
     }
 

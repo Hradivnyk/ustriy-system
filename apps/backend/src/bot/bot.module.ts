@@ -13,9 +13,11 @@ import { ActiveTicketsWizard } from './active-tickets/active-tickets.wizard';
 import { BotUpdate } from './bot.update';
 import { MainMenuWizard } from './main-menu/main-menu.wizard';
 import { OnboardingWizard } from './onboarding/onboarding.wizard';
+import { ProfileWizard } from './profile/profile.wizard';
 import { RegistrationService } from './registration/registration.service';
 import { RegistrationWizard } from './registration/registration.wizard';
 import { SubmitTicketWizard } from './submit-ticket/submit-ticket.wizard';
+import { TicketHistoryWizard } from './ticket-history/ticket-history.wizard';
 import { VerifyEmailWizard } from './verify-email/verify-email.wizard';
 
 @Module({
@@ -38,10 +40,12 @@ import { VerifyEmailWizard } from './verify-email/verify-email.wizard';
     MainMenuWizard,
     OnboardingWizard,
     AccountRecoveryWizard,
+    ProfileWizard,
     RegistrationWizard,
     RegistrationService,
     VerifyEmailWizard,
     SubmitTicketWizard,
+    TicketHistoryWizard,
   ],
 })
 export class BotModule {}

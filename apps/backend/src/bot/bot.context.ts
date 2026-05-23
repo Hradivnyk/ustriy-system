@@ -19,6 +19,14 @@ export interface SubmitTicketState {
   description?: string;
 }
 
+export interface TicketPaginationState {
+  ticketIndex?: number;
+}
+
+export interface ProfileEditState {
+  editField?: 'name' | 'dormitory' | 'room';
+}
+
 export interface BotSession extends Scenes.WizardSessionData {
   pendingUserId?: string;
 }
@@ -26,6 +34,9 @@ export interface BotSession extends Scenes.WizardSessionData {
 export type BotContext = Scenes.WizardContext & {
   session: BotSession;
   wizard: Scenes.WizardContext['wizard'] & {
-    state: RegistrationState & SubmitTicketState;
+    state: RegistrationState &
+      SubmitTicketState &
+      TicketPaginationState &
+      ProfileEditState;
   };
 };

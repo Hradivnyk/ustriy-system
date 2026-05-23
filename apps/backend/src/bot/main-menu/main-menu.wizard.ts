@@ -4,7 +4,9 @@ import { Markup } from 'telegraf';
 
 import { ACTIVE_TICKETS_SCENE_ID } from '../active-tickets/active-tickets.wizard';
 import type { BotContext } from '../bot.context';
+import { PROFILE_SCENE_ID } from '../profile/profile.wizard';
 import { SUBMIT_TICKET_SCENE_ID } from '../submit-ticket/submit-ticket.wizard';
+import { TICKET_HISTORY_SCENE_ID } from '../ticket-history/ticket-history.wizard';
 import { answerCbQuery } from '../utils/answer-cb-query';
 import { editMessageText } from '../utils/edit-message-text';
 
@@ -17,11 +19,6 @@ const MENU_KEYBOARD = Markup.inlineKeyboard([
   [Markup.button.callback('🗂 Історія заявок', 'menu:ticket-history')],
   [Markup.button.callback('👤 Мій профіль', 'menu:profile')],
 ]);
-
-const STUB_RESPONSES: Record<string, string> = {
-  'menu:ticket-history': '🗂 Функція перегляду історії заявок поки недоступна.',
-  'menu:profile': '👤 Функція редагування профілю поки недоступна.',
-};
 
 @Wizard(MAIN_MENU_SCENE_ID)
 @Injectable()
@@ -57,13 +54,15 @@ export class MainMenuWizard {
       return;
     }
 
-    const stubMessage = STUB_RESPONSES[action];
-    if (stubMessage) {
-      await editMessageText(
-        ctx,
-        `${stubMessage}\n\n${MENU_TEXT}`,
-        MENU_KEYBOARD,
-      );
+    if (action === 'menu:ticket-history') {
+      await ctx.scene.leave();
+      await ctx.scene.enter(TICKET_HISTORY_SCENE_ID);
+      return;
+    }
+
+    if (action === 'menu:profile') {
+      await ctx.scene.leave();
+      await ctx.scene.enter(PROFILE_SCENE_ID);
       return;
     }
 
