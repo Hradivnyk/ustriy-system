@@ -8,6 +8,7 @@ import { DormitoriesService } from '../../dormitories/dormitory.service';
 import type { BotContext, RegistrationState } from '../bot.context';
 import { RegistrationService } from './registration.service';
 import { answerCbQuery } from '../utils/answer-cb-query';
+import { editMessageText } from '../utils/edit-message-text';
 
 export const REGISTRATION_SCENE_ID = 'registration';
 
@@ -51,7 +52,7 @@ export class RegistrationWizard {
     state.residentType = type;
     await answerCbQuery(ctx);
     const typeLabel = type === 'student' ? '🎓 Студент' : '🏠 Орендар';
-    await ctx.editMessageText(`Тип мешканця: ${typeLabel}`);
+    await editMessageText(ctx, `Тип мешканця: ${typeLabel}`);
     await ctx.reply("Введіть ваше повне ім'я:");
     ctx.wizard.next();
   }
@@ -107,7 +108,7 @@ export class RegistrationWizard {
     const state = ctx.wizard.state as RegistrationState;
     state.dormitoryId = dormitory.id;
     await answerCbQuery(ctx);
-    await ctx.editMessageText(`Гуртожиток: №${dormitory.number}`);
+    await editMessageText(ctx, `Гуртожиток: №${dormitory.number}`);
     await ctx.reply('Введіть номер вашої кімнати:');
     ctx.wizard.next();
   }

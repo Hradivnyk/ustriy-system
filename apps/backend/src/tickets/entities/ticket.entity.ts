@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Generated,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -17,6 +18,10 @@ import { Resident } from '../../residents/entities/resident.entity';
 export class Ticket {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  @Column({ unique: true })
+  @Generated('increment')
+  ticketNumber!: number;
 
   @Column()
   residentId!: string;

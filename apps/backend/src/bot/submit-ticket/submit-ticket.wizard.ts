@@ -7,6 +7,7 @@ import { TicketsService } from '../../tickets/tickets.service';
 import type { BotContext, SubmitTicketState } from '../bot.context';
 import { MAIN_MENU_SCENE_ID } from '../main-menu/main-menu.wizard';
 import { answerCbQuery } from '../utils/answer-cb-query';
+import { editMessageText } from '../utils/edit-message-text';
 
 export const SUBMIT_TICKET_SCENE_ID = 'submit-ticket';
 
@@ -76,7 +77,8 @@ export class SubmitTicketWizard {
     state.specialistId = specialist.id;
     state.specialistName = specialist.name;
 
-    await ctx.editMessageText(
+    await editMessageText(
+      ctx,
       `👷 Обраний фахівець: <b>${specialist.name}</b>`,
       {
         parse_mode: 'HTML',
@@ -152,7 +154,7 @@ export class SubmitTicketWizard {
       `📝 Опис: ${state.description}`;
 
     if (data === 'confirm:cancel') {
-      await ctx.editMessageText(`${summary}\n\n↩ Подачу скасовано`, {
+      await editMessageText(ctx, `${summary}\n\n↩ Подачу скасовано`, {
         parse_mode: 'HTML',
       });
       await ctx.scene.leave();
@@ -169,7 +171,8 @@ export class SubmitTicketWizard {
       await this.residentsService.findByTelegramIdWithProfile(telegramId);
 
     if (!residentData || !residentData.profile) {
-      await ctx.editMessageText(
+      await editMessageText(
+        ctx,
         `${summary}\n\n❌ Профіль не знайдено. Зверніться до диспетчера.`,
         { parse_mode: 'HTML' },
       );
@@ -185,7 +188,8 @@ export class SubmitTicketWizard {
       description: state.description!,
     });
 
-    await ctx.editMessageText(
+    await editMessageText(
+      ctx,
       `${summary}\n\n✅ Заявку подано!\nНомер: <code>${ticket.id}</code>`,
       { parse_mode: 'HTML' },
     );

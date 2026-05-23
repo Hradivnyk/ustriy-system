@@ -5,6 +5,7 @@ import { Markup } from 'telegraf';
 import type { BotContext } from '../bot.context';
 import { SUBMIT_TICKET_SCENE_ID } from '../submit-ticket/submit-ticket.wizard';
 import { answerCbQuery } from '../utils/answer-cb-query';
+import { editMessageText } from '../utils/edit-message-text';
 
 export const MAIN_MENU_SCENE_ID = 'main-menu';
 
@@ -45,7 +46,7 @@ export class MainMenuWizard {
     const action = ctx.callbackQuery.data as string;
     const label = ACTION_LABELS[action];
     if (label) {
-      await ctx.editMessageText(label);
+      await editMessageText(ctx, label);
     }
 
     if (action === 'menu:submit-ticket') {
