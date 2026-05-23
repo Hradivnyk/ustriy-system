@@ -32,7 +32,8 @@ export class SubmitTicketWizard {
     ]);
     rows.push([Markup.button.callback(CANCEL_BTN, CANCEL_CB)]);
 
-    await ctx.reply(
+    await editMessageText(
+      ctx,
       '📝 Подача заявки — крок 1/2\nОберіть фахівця:',
       Markup.inlineKeyboard(rows),
     );

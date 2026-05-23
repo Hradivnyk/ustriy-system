@@ -122,6 +122,29 @@ export class TicketsService implements OnApplicationBootstrap {
     return query.getMany();
   }
 
+  async findActiveByResident(residentId: string): Promise<Ticket[]> {
+    return this.ticketRepository
+      .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.specialist', 'specialist')
+      .leftJoinAndSelect('ticket.status', 'status')
+      .where('ticket.residentId = :residentId', { residentId })
+      .andWhere('status.name NOT IN (:...excluded)', {
+        excluded: ['Відхилено', 'Виконано'],
+      })
+      .orderBy('ticket.createdAt', 'DESC')
+      .getMany();
+  }
+
+  async findAllByResident(residentId: string): Promise<Ticket[]> {
+    return this.ticketRepository
+      .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.specialist', 'specialist')
+      .leftJoinAndSelect('ticket.status', 'status')
+      .where('ticket.residentId = :residentId', { residentId })
+      .orderBy('ticket.createdAt', 'DESC')
+      .getMany();
+  }
+
   async updateStatus(id: string, statusId: number): Promise<Ticket> {
     const ticket = await this.findById(id);
 
