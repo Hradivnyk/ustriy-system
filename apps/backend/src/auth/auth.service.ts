@@ -47,7 +47,7 @@ export class AuthService {
 
     res.cookie('refresh_token', tokens.refreshToken, {
       ...base,
-      path: '/auth/refresh',
+      path: '/api/auth/refresh',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   }
@@ -57,7 +57,7 @@ export class AuthService {
     res.cookie('refresh_token', '', {
       httpOnly: true,
       maxAge: 0,
-      path: '/auth/refresh',
+      path: '/api/auth/refresh',
     });
   }
 }

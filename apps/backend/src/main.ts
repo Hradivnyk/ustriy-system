@@ -21,6 +21,8 @@ async function bootstrap(): Promise<void> {
     credentials: true,
   });
 
+  app.setGlobalPrefix('api');
+
   app.useGlobalFilters(new AllExceptionsFilter());
 
   app.useGlobalPipes(
