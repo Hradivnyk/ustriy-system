@@ -12,6 +12,7 @@ import { editMessageText } from '../utils/edit-message-text';
 export const SUBMIT_TICKET_SCENE_ID = 'submit-ticket';
 
 const CANCEL_BTN = '❌ Скасувати';
+const CANCEL_CB = 'spec:cancel';
 const CANCEL_KEYBOARD = Markup.keyboard([[CANCEL_BTN]]).resize();
 
 @Wizard(SUBMIT_TICKET_SCENE_ID)
@@ -26,30 +27,21 @@ export class SubmitTicketWizard {
   async onEnter(@Ctx() ctx: BotContext): Promise<void> {
     const specialists = await this.ticketsService.findAllSpecialists();
 
-    await ctx.reply(
-      '📝 Подача заявки — крок 1/2\nОберіть фахівця:',
-      CANCEL_KEYBOARD,
-    );
-
     const rows = specialists.map((s) => [
       Markup.button.callback(s.name, `spec:${s.id}`),
     ]);
-    await ctx.reply('👷 Фахівці:', Markup.inlineKeyboard(rows));
+    rows.push([Markup.button.callback(CANCEL_BTN, CANCEL_CB)]);
+
+    await ctx.reply(
+      '📝 Подача заявки — крок 1/2\nОберіть фахівця:',
+      Markup.inlineKeyboard(rows),
+    );
 
     ctx.wizard.next();
   }
 
   @WizardStep(2)
   async onSpecialist(@Ctx() ctx: BotContext): Promise<void> {
-    if (
-      ctx.message &&
-      'text' in ctx.message &&
-      ctx.message.text === CANCEL_BTN
-    ) {
-      await this.cancel(ctx);
-      return;
-    }
-
     if (!ctx.callbackQuery || !('data' in ctx.callbackQuery)) {
       await ctx.reply(
         'Будь ласка, оберіть фахівця з кнопок вище або скасуйте.',
@@ -60,6 +52,12 @@ export class SubmitTicketWizard {
     const data = ctx.callbackQuery.data;
     if (!data.startsWith('spec:')) {
       await answerCbQuery(ctx);
+      return;
+    }
+
+    if (data === CANCEL_CB) {
+      await answerCbQuery(ctx);
+      await this.cancel(ctx);
       return;
     }
 
@@ -190,7 +188,7 @@ export class SubmitTicketWizard {
 
     await editMessageText(
       ctx,
-      `${summary}\n\n✅ Заявку подано!\nНомер: <code>${ticket.id}</code>`,
+      `${summary}\n\n✅ Заявку подано!\nНомер заявки: #<code>${ticket.ticketNumber}</code>`,
       { parse_mode: 'HTML' },
     );
 

@@ -5,7 +5,6 @@ import { Markup } from 'telegraf';
 import type { BotContext } from '../bot.context';
 import { SUBMIT_TICKET_SCENE_ID } from '../submit-ticket/submit-ticket.wizard';
 import { answerCbQuery } from '../utils/answer-cb-query';
-import { editMessageText } from '../utils/edit-message-text';
 
 export const MAIN_MENU_SCENE_ID = 'main-menu';
 
@@ -16,13 +15,6 @@ const MENU_KEYBOARD = Markup.inlineKeyboard([
   [Markup.button.callback('🗂 Історія заявок', 'menu:ticket-history')],
   [Markup.button.callback('👤 Мій профіль', 'menu:profile')],
 ]);
-
-const ACTION_LABELS: Record<string, string> = {
-  'menu:submit-ticket': '📝 Подача заявки',
-  'menu:active-tickets': '🔧 Активні заявки',
-  'menu:ticket-history': '🗂 Історія заявок',
-  'menu:profile': '👤 Мій профіль',
-};
 
 const STUB_RESPONSES: Record<string, string> = {
   'menu:active-tickets':
@@ -36,17 +28,21 @@ const STUB_RESPONSES: Record<string, string> = {
 export class MainMenuWizard {
   @WizardStep(1)
   async onMenu(@Ctx() ctx: BotContext): Promise<void> {
-    if (!ctx.callbackQuery || !('data' in ctx.callbackQuery)) {
+    const action =
+      ctx.callbackQuery && 'data' in ctx.callbackQuery
+        ? (ctx.callbackQuery.data as string)
+        : null;
+
+    if (!action?.startsWith('menu:')) {
       await ctx.reply(MENU_TEXT, MENU_KEYBOARD);
       return;
     }
 
     await answerCbQuery(ctx);
-
-    const action = ctx.callbackQuery.data as string;
-    const label = ACTION_LABELS[action];
-    if (label) {
-      await editMessageText(ctx, label);
+    try {
+      await ctx.editMessageReplyMarkup(undefined);
+    } catch {
+      // message markup already removed or unchanged — safe to ignore
     }
 
     if (action === 'menu:submit-ticket') {

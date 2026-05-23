@@ -7,6 +7,7 @@ import type { AppEnv } from '../../config/env.schema';
 import { DormitoriesService } from '../../dormitories/dormitory.service';
 import type { BotContext, RegistrationState } from '../bot.context';
 import { RegistrationService } from './registration.service';
+import { MAIN_MENU_SCENE_ID } from '../main-menu/main-menu.wizard';
 import { answerCbQuery } from '../utils/answer-cb-query';
 import { editMessageText } from '../utils/edit-message-text';
 
@@ -215,6 +216,7 @@ export class RegistrationWizard {
         '✅ Реєстрацію завершено! Ласкаво просимо до системи Ustriy.',
       );
       await ctx.scene.leave();
+      await ctx.scene.enter(MAIN_MENU_SCENE_ID);
       return;
     }
 
