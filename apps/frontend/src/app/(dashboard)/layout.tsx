@@ -1,3 +1,8 @@
+'use client';
+
+import { Layout } from 'antd';
+
+import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 
@@ -7,12 +12,15 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>): React.JSX.Element {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Layout style={{ height: '100vh' }}>
       <Header />
-      <div style={{ display: 'flex', flex: 1 }}>
+      <Layout style={{ flex: 1, overflow: 'hidden' }}>
         <Sidebar />
-        <main style={{ flex: 1, padding: '1.5rem' }}>{children}</main>
-      </div>
-    </div>
+        <Layout style={{ flexDirection: 'column', overflowY: 'auto' }}>
+          <Layout.Content style={{ padding: 24, flex: 1 }}>{children}</Layout.Content>
+          <Footer />
+        </Layout>
+      </Layout>
+    </Layout>
   );
 }
