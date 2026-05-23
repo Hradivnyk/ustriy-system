@@ -5,6 +5,7 @@ import type { BotContext, BotSession } from './bot.context';
 import { EmailVerificationService } from '../email-verification/email-verification.service';
 import { ResidentType } from '../residents/entities/resident-profile.entity';
 import { ResidentsService } from '../residents/residents.service';
+import { MAIN_MENU_SCENE_ID } from './main-menu/main-menu.wizard';
 import { ONBOARDING_SCENE_ID } from './onboarding/onboarding.wizard';
 import { VERIFY_EMAIL_SCENE_ID } from './verify-email/verify-email.wizard';
 
@@ -63,6 +64,7 @@ export class BotUpdate {
 
     if (resident.isActive) {
       await ctx.reply(`З поверненням, ${resident.name}! 👋`);
+      await ctx.scene.enter(MAIN_MENU_SCENE_ID);
       return;
     }
 

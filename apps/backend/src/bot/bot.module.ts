@@ -9,6 +9,7 @@ import { EmailVerificationModule } from '../email-verification/email-verificatio
 import { ResidentsModule } from '../residents/residents.module';
 import { AccountRecoveryWizard } from './account-recovery/account-recovery.wizard';
 import { BotUpdate } from './bot.update';
+import { MainMenuWizard } from './main-menu/main-menu.wizard';
 import { OnboardingWizard } from './onboarding/onboarding.wizard';
 import { RegistrationService } from './registration/registration.service';
 import { RegistrationWizard } from './registration/registration.wizard';
@@ -29,6 +30,7 @@ import { VerifyEmailWizard } from './verify-email/verify-email.wizard';
   ],
   providers: [
     BotUpdate,
+    MainMenuWizard,
     OnboardingWizard,
     AccountRecoveryWizard,
     RegistrationWizard,
