@@ -7,6 +7,7 @@ import { ResidentType } from '../residents/entities/resident-profile.entity';
 import { ResidentsService } from '../residents/residents.service';
 import { MAIN_MENU_SCENE_ID } from './main-menu/main-menu.wizard';
 import { ONBOARDING_SCENE_ID } from './onboarding/onboarding.wizard';
+import { answerCbQuery } from './utils/answer-cb-query';
 import { VERIFY_EMAIL_SCENE_ID } from './verify-email/verify-email.wizard';
 
 @Update()
@@ -102,7 +103,7 @@ export class BotUpdate {
       return next();
     }
 
-    await ctx.answerCbQuery();
+    await answerCbQuery(ctx);
 
     if (!ctx.from) return;
 
@@ -143,7 +144,7 @@ export class BotUpdate {
       return next();
     }
 
-    await ctx.answerCbQuery();
+    await answerCbQuery(ctx);
     await ctx.reply(
       'Гаразд. Надішліть /start коли будете готові підтвердити email.',
     );

@@ -5,6 +5,7 @@ import { Markup } from 'telegraf';
 import { ACCOUNT_RECOVERY_SCENE_ID } from '../account-recovery/account-recovery.wizard';
 import type { BotContext } from '../bot.context';
 import { REGISTRATION_SCENE_ID } from '../registration/registration.wizard';
+import { answerCbQuery } from '../utils/answer-cb-query';
 
 export const ONBOARDING_SCENE_ID = 'onboarding';
 
@@ -27,14 +28,16 @@ export class OnboardingWizard {
       return;
     }
 
-    await ctx.answerCbQuery();
+    await answerCbQuery(ctx);
 
     if (ctx.callbackQuery.data === 'has-account') {
+      await ctx.editMessageText('✅ Відновлення акаунту');
       await ctx.scene.leave();
       await ctx.scene.enter(ACCOUNT_RECOVERY_SCENE_ID);
       return;
     }
 
+    await ctx.editMessageText('🆕 Реєстрація нового акаунту');
     await ctx.scene.leave();
     await ctx.scene.enter(REGISTRATION_SCENE_ID);
   }

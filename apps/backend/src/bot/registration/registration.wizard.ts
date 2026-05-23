@@ -7,6 +7,7 @@ import type { AppEnv } from '../../config/env.schema';
 import { DormitoriesService } from '../../dormitories/dormitory.service';
 import type { BotContext, RegistrationState } from '../bot.context';
 import { RegistrationService } from './registration.service';
+import { answerCbQuery } from '../utils/answer-cb-query';
 
 export const REGISTRATION_SCENE_ID = 'registration';
 
@@ -42,13 +43,15 @@ export class RegistrationWizard {
 
     const type = ctx.callbackQuery.data;
     if (type !== 'student' && type !== 'tenant') {
-      await ctx.answerCbQuery();
+      await answerCbQuery(ctx);
       return;
     }
 
     const state = ctx.wizard.state as RegistrationState;
     state.residentType = type;
-    await ctx.answerCbQuery();
+    await answerCbQuery(ctx);
+    const typeLabel = type === 'student' ? '🎓 Студент' : '🏠 Орендар';
+    await ctx.editMessageText(`Тип мешканця: ${typeLabel}`);
     await ctx.reply("Введіть ваше повне ім'я:");
     ctx.wizard.next();
   }
@@ -89,7 +92,7 @@ export class RegistrationWizard {
 
     const data = ctx.callbackQuery.data;
     if (!data.startsWith('dorm:')) {
-      await ctx.answerCbQuery();
+      await answerCbQuery(ctx);
       return;
     }
 
@@ -97,13 +100,14 @@ export class RegistrationWizard {
     const dormitory = await this.dormitoriesService.findById(dormId);
 
     if (!dormitory) {
-      await ctx.answerCbQuery('Гуртожиток не знайдено, спробуйте ще раз.');
+      await answerCbQuery(ctx, 'Гуртожиток не знайдено, спробуйте ще раз.');
       return;
     }
 
     const state = ctx.wizard.state as RegistrationState;
     state.dormitoryId = dormitory.id;
-    await ctx.answerCbQuery();
+    await answerCbQuery(ctx);
+    await ctx.editMessageText(`Гуртожиток: №${dormitory.number}`);
     await ctx.reply('Введіть номер вашої кімнати:');
     ctx.wizard.next();
   }

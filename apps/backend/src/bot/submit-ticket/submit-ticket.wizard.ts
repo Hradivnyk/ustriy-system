@@ -6,6 +6,7 @@ import { ResidentsService } from '../../residents/residents.service';
 import { TicketsService } from '../../tickets/tickets.service';
 import type { BotContext, SubmitTicketState } from '../bot.context';
 import { MAIN_MENU_SCENE_ID } from '../main-menu/main-menu.wizard';
+import { answerCbQuery } from '../utils/answer-cb-query';
 
 export const SUBMIT_TICKET_SCENE_ID = 'submit-ticket';
 
@@ -57,11 +58,11 @@ export class SubmitTicketWizard {
 
     const data = ctx.callbackQuery.data;
     if (!data.startsWith('spec:')) {
-      await ctx.answerCbQuery();
+      await answerCbQuery(ctx);
       return;
     }
 
-    await ctx.answerCbQuery();
+    await answerCbQuery(ctx);
     const specialistId = parseInt(data.replace('spec:', ''), 10);
     const specialist =
       await this.ticketsService.findSpecialistById(specialistId);
@@ -75,8 +76,14 @@ export class SubmitTicketWizard {
     state.specialistId = specialist.id;
     state.specialistName = specialist.name;
 
+    await ctx.editMessageText(
+      `👷 Обраний фахівець: <b>${specialist.name}</b>`,
+      {
+        parse_mode: 'HTML',
+      },
+    );
     await ctx.reply(
-      `✅ Фахівець: ${specialist.name}\n\n📝 Крок 2/2\nОпишіть проблему (до 1000 символів):`,
+      `📝 Крок 2/2\nОпишіть проблему (до 1000 символів):`,
       CANCEL_KEYBOARD,
     );
 
@@ -137,10 +144,17 @@ export class SubmitTicketWizard {
       return;
     }
 
-    await ctx.answerCbQuery();
+    await answerCbQuery(ctx);
     const data = ctx.callbackQuery.data;
+    const state = ctx.wizard.state as SubmitTicketState;
+    const summary =
+      `👷 Фахівець: <b>${state.specialistName}</b>\n` +
+      `📝 Опис: ${state.description}`;
 
     if (data === 'confirm:cancel') {
+      await ctx.editMessageText(`${summary}\n\n↩ Подачу скасовано`, {
+        parse_mode: 'HTML',
+      });
       await ctx.scene.leave();
       await ctx.scene.enter(MAIN_MENU_SCENE_ID);
       return;
@@ -155,15 +169,14 @@ export class SubmitTicketWizard {
       await this.residentsService.findByTelegramIdWithProfile(telegramId);
 
     if (!residentData || !residentData.profile) {
-      await ctx.reply(
-        '❌ Не вдалося знайти ваш профіль. Зверніться до диспетчера.',
+      await ctx.editMessageText(
+        `${summary}\n\n❌ Профіль не знайдено. Зверніться до диспетчера.`,
+        { parse_mode: 'HTML' },
       );
       await ctx.scene.leave();
       await ctx.scene.enter(MAIN_MENU_SCENE_ID);
       return;
     }
-
-    const state = ctx.wizard.state as SubmitTicketState;
 
     const ticket = await this.ticketsService.create({
       residentId: residentData.resident.id,
@@ -172,9 +185,10 @@ export class SubmitTicketWizard {
       description: state.description!,
     });
 
-    await ctx.reply(`✅ Заявку подано!\nНомер: <code>${ticket.id}</code>`, {
-      parse_mode: 'HTML',
-    });
+    await ctx.editMessageText(
+      `${summary}\n\n✅ Заявку подано!\nНомер: <code>${ticket.id}</code>`,
+      { parse_mode: 'HTML' },
+    );
 
     await ctx.scene.leave();
     await ctx.scene.enter(MAIN_MENU_SCENE_ID);

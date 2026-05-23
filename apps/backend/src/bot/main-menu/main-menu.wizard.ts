@@ -4,6 +4,7 @@ import { Markup } from 'telegraf';
 
 import type { BotContext } from '../bot.context';
 import { SUBMIT_TICKET_SCENE_ID } from '../submit-ticket/submit-ticket.wizard';
+import { answerCbQuery } from '../utils/answer-cb-query';
 
 export const MAIN_MENU_SCENE_ID = 'main-menu';
 
@@ -14,6 +15,13 @@ const MENU_KEYBOARD = Markup.inlineKeyboard([
   [Markup.button.callback('🗂 Історія заявок', 'menu:ticket-history')],
   [Markup.button.callback('👤 Мій профіль', 'menu:profile')],
 ]);
+
+const ACTION_LABELS: Record<string, string> = {
+  'menu:submit-ticket': '📝 Подача заявки',
+  'menu:active-tickets': '🔧 Активні заявки',
+  'menu:ticket-history': '🗂 Історія заявок',
+  'menu:profile': '👤 Мій профіль',
+};
 
 const STUB_RESPONSES: Record<string, string> = {
   'menu:active-tickets':
@@ -32,9 +40,13 @@ export class MainMenuWizard {
       return;
     }
 
-    await ctx.answerCbQuery();
+    await answerCbQuery(ctx);
 
     const action = ctx.callbackQuery.data as string;
+    const label = ACTION_LABELS[action];
+    if (label) {
+      await ctx.editMessageText(label);
+    }
 
     if (action === 'menu:submit-ticket') {
       await ctx.scene.leave();
