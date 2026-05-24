@@ -5,7 +5,9 @@ import type { BotContext, BotSession } from './bot.context';
 import { EmailVerificationService } from '../email-verification/email-verification.service';
 import { ResidentType } from '../residents/entities/resident-profile.entity';
 import { ResidentsService } from '../residents/residents.service';
+import { MAIN_MENU_SCENE_ID } from './main-menu/main-menu.wizard';
 import { ONBOARDING_SCENE_ID } from './onboarding/onboarding.wizard';
+import { answerCbQuery } from './utils/answer-cb-query';
 import { VERIFY_EMAIL_SCENE_ID } from './verify-email/verify-email.wizard';
 
 @Update()
@@ -32,6 +34,25 @@ export class BotUpdate {
 
     // Already in a scene — let the scene handle the update
     if (ctx.session.__scenes?.current) return next();
+
+    // Callback with no active scene: either a known global handler or a stale button
+    if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
+      const cbData = ctx.callbackQuery.data;
+      if (
+        cbData === 'resend-verification' ||
+        cbData === 'cancel-verification'
+      ) {
+        return next();
+      }
+      // Stale button from a previous session — dismiss it silently
+      await answerCbQuery(ctx);
+      try {
+        await ctx.editMessageReplyMarkup(undefined);
+      } catch {
+        // already removed or message inaccessible — safe to ignore
+      }
+      return;
+    }
 
     const resident = await this.residentsService.findByTelegramId(
       String(ctx.from.id),
@@ -63,6 +84,7 @@ export class BotUpdate {
 
     if (resident.isActive) {
       await ctx.reply(`З поверненням, ${resident.name}! 👋`);
+      await ctx.scene.enter(MAIN_MENU_SCENE_ID);
       return;
     }
 
@@ -100,7 +122,12 @@ export class BotUpdate {
       return next();
     }
 
-    await ctx.answerCbQuery();
+    await answerCbQuery(ctx);
+    try {
+      await ctx.editMessageReplyMarkup(undefined);
+    } catch {
+      // already removed or message inaccessible — safe to ignore
+    }
 
     if (!ctx.from) return;
 
@@ -141,7 +168,12 @@ export class BotUpdate {
       return next();
     }
 
-    await ctx.answerCbQuery();
+    await answerCbQuery(ctx);
+    try {
+      await ctx.editMessageReplyMarkup(undefined);
+    } catch {
+      // already removed or message inaccessible — safe to ignore
+    }
     await ctx.reply(
       'Гаразд. Надішліть /start коли будете готові підтвердити email.',
     );

@@ -90,4 +90,22 @@ export class ResidentsService {
     await this.residentRepository.update(residentId, { isActive: true });
     await this.profileRepository.update({ residentId }, { isVerified: true });
   }
+
+  async updateName(residentId: string, name: string): Promise<void> {
+    await this.residentRepository.update(residentId, { name });
+  }
+
+  async updateDormitory(
+    residentId: string,
+    dormitoryId: number,
+  ): Promise<void> {
+    await this.profileRepository.update({ residentId }, { dormitoryId });
+  }
+
+  async updateRoomNumber(
+    residentId: string,
+    roomNumber: string,
+  ): Promise<void> {
+    await this.profileRepository.update({ residentId }, { roomNumber });
+  }
 }
