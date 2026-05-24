@@ -69,6 +69,11 @@ export class ActiveTicketsWizard {
 
     if (cbData === BACK_CB) {
       await answerCbQuery(ctx);
+      try {
+        await ctx.editMessageReplyMarkup(undefined);
+      } catch {
+        // already removed or message inaccessible — safe to ignore
+      }
       await ctx.scene.leave();
       await ctx.scene.enter(MAIN_MENU_SCENE_ID);
       return;

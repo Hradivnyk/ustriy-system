@@ -104,6 +104,11 @@ export class ProfileWizard {
     await answerCbQuery(ctx);
 
     if (cbData === BACK_CB) {
+      try {
+        await ctx.editMessageReplyMarkup(undefined);
+      } catch {
+        // already removed or message inaccessible — safe to ignore
+      }
       await ctx.scene.leave();
       await ctx.scene.enter(MAIN_MENU_SCENE_ID);
       return;

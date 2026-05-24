@@ -35,6 +35,25 @@ export class BotUpdate {
     // Already in a scene — let the scene handle the update
     if (ctx.session.__scenes?.current) return next();
 
+    // Callback with no active scene: either a known global handler or a stale button
+    if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
+      const cbData = ctx.callbackQuery.data;
+      if (
+        cbData === 'resend-verification' ||
+        cbData === 'cancel-verification'
+      ) {
+        return next();
+      }
+      // Stale button from a previous session — dismiss it silently
+      await answerCbQuery(ctx);
+      try {
+        await ctx.editMessageReplyMarkup(undefined);
+      } catch {
+        // already removed or message inaccessible — safe to ignore
+      }
+      return;
+    }
+
     const resident = await this.residentsService.findByTelegramId(
       String(ctx.from.id),
     );
@@ -104,6 +123,11 @@ export class BotUpdate {
     }
 
     await answerCbQuery(ctx);
+    try {
+      await ctx.editMessageReplyMarkup(undefined);
+    } catch {
+      // already removed or message inaccessible — safe to ignore
+    }
 
     if (!ctx.from) return;
 
@@ -145,6 +169,11 @@ export class BotUpdate {
     }
 
     await answerCbQuery(ctx);
+    try {
+      await ctx.editMessageReplyMarkup(undefined);
+    } catch {
+      // already removed or message inaccessible — safe to ignore
+    }
     await ctx.reply(
       'Гаразд. Надішліть /start коли будете готові підтвердити email.',
     );
