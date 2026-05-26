@@ -13,11 +13,30 @@ export interface AccountRecoveryState {
   userId?: string;
 }
 
+export interface SubmitTicketState {
+  specialistId?: number;
+  specialistName?: string;
+  description?: string;
+}
+
+export interface TicketPaginationState {
+  ticketIndex?: number;
+}
+
+export interface ProfileEditState {
+  editField?: 'name' | 'dormitory' | 'room';
+}
+
 export interface BotSession extends Scenes.WizardSessionData {
   pendingUserId?: string;
 }
 
 export type BotContext = Scenes.WizardContext & {
   session: BotSession;
-  wizard: Scenes.WizardContext['wizard'] & { state: RegistrationState };
+  wizard: Scenes.WizardContext['wizard'] & {
+    state: RegistrationState &
+      SubmitTicketState &
+      TicketPaginationState &
+      ProfileEditState;
+  };
 };

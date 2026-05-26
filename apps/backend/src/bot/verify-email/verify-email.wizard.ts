@@ -4,6 +4,7 @@ import { Ctx, Wizard, WizardStep } from 'nestjs-telegraf';
 import { EmailVerificationService } from '../../email-verification/email-verification.service';
 import { ResidentsService } from '../../residents/residents.service';
 import type { BotContext, BotSession } from '../bot.context';
+import { MAIN_MENU_SCENE_ID } from '../main-menu/main-menu.wizard';
 
 export const VERIFY_EMAIL_SCENE_ID = 'verify-email';
 
@@ -49,6 +50,7 @@ export class VerifyEmailWizard {
         '✅ Email підтверджено! Ласкаво просимо до системи Ustriy.',
       );
       await ctx.scene.leave();
+      await ctx.scene.enter(MAIN_MENU_SCENE_ID);
       return;
     }
 
