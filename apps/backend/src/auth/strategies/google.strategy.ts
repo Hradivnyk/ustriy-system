@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-google-oauth20';
@@ -9,6 +9,9 @@ import { StaffService } from '../../staff/staff.service';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
+  private readonly logger = new Logger(GoogleStrategy.name);
+  private readonly allowedEmail: string | undefined;
+
   constructor(
     config: ConfigService<AppEnv, true>,
     private readonly staffService: StaffService,
@@ -24,6 +27,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       scope: ['email', 'profile'],
       state: false,
     });
+    this.allowedEmail = config.get('ADMIN_ALLOWED_EMAIL', { infer: true });
   }
 
   override authorizationParams(options: object): object {
@@ -36,14 +40,24 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: { id: string; emails?: { value: string }[]; displayName: string },
   ): Promise<Staff> {
     const email = profile.emails?.[0]?.value;
+    this.logger.log(`OAuth profile — id: "${profile.id}", email: "${email}"`);
+
     if (!email) {
       throw new UnauthorizedException('No email from Google profile');
     }
 
+    if (this.allowedEmail && email !== this.allowedEmail) {
+      throw new UnauthorizedException('Access denied for this account.');
+    }
+
     let staff = await this.staffService.findByGoogleId(profile.id);
+    this.logger.log(
+      `findByGoogleId("${profile.id}") → ${staff ? staff.id : 'null'}`,
+    );
 
     if (!staff) {
       staff = await this.staffService.findByEmail(email);
+      this.logger.log(`findByEmail("${email}") → ${staff ? staff.id : 'null'}`);
       if (!staff) {
         throw new UnauthorizedException(
           'Account not registered. Contact the dispatcher.',

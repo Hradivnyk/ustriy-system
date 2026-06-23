@@ -1,0 +1,28 @@
+services:
+  backend:
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+    restart: 'no'
+
+  frontend:
+    ports:
+      - '3001:3001'
+    restart: 'no'
+
+  postgres:
+    ports:
+      - '5432:5432'
+
+  redis:
+    ports:
+      - '6379:6379'
+
+  nginx:
+    profiles:
+      - production-only
+
+  certbot:
+    profiles:
+      - production-only

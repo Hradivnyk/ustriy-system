@@ -10,6 +10,15 @@ import { RegistrationService } from './registration.service';
 import { MAIN_MENU_SCENE_ID } from '../main-menu/main-menu.wizard';
 import { answerCbQuery } from '../utils/answer-cb-query';
 import { editMessageText } from '../utils/edit-message-text';
+import {
+  ROOM_FLOOR_PREFIX,
+  ROOM_NUM_PREFIX,
+  ROOM_TYPE_PREFIX,
+  buildFloorKeyboard,
+  buildRoomNumKeyboard,
+  buildRoomTypeKeyboard,
+  composeRoomNumber,
+} from '../utils/room-keyboard';
 
 export const REGISTRATION_SCENE_ID = 'registration';
 
@@ -110,25 +119,76 @@ export class RegistrationWizard {
     state.dormitoryId = dormitory.id;
     await answerCbQuery(ctx);
     await editMessageText(ctx, `Гуртожиток: №${dormitory.number}`);
-    await ctx.reply('Введіть номер вашої кімнати:');
+    await ctx.reply('Оберіть поверх:', buildFloorKeyboard());
     ctx.wizard.next();
   }
 
   @WizardStep(5)
-  async onRoomNumber(@Ctx() ctx: BotContext): Promise<void> {
-    if (!ctx.message || !('text' in ctx.message) || !ctx.message.text.trim()) {
-      await ctx.reply('Будь ласка, введіть номер кімнати.');
+  async onFloor(@Ctx() ctx: BotContext): Promise<void> {
+    if (!ctx.callbackQuery || !('data' in ctx.callbackQuery)) {
+      await ctx.reply('Будь ласка, оберіть поверх з кнопок вище.');
       return;
     }
 
-    const room = ctx.message.text.trim();
-    if (room.length > 20) {
-      await ctx.reply('Номер кімнати занадто довгий. Спробуйте ще раз.');
+    const data = ctx.callbackQuery.data;
+    if (!data.startsWith(ROOM_FLOOR_PREFIX)) {
+      await answerCbQuery(ctx);
       return;
     }
 
+    const floor = parseInt(data.replace(ROOM_FLOOR_PREFIX, ''), 10);
     const state = ctx.wizard.state as RegistrationState;
-    state.roomNumber = room;
+    state.roomFloor = floor;
+    await answerCbQuery(ctx);
+    await editMessageText(ctx, `Поверх: ${floor}`);
+    await ctx.reply('Оберіть номер кімнати:', buildRoomNumKeyboard());
+    ctx.wizard.next();
+  }
+
+  @WizardStep(6)
+  async onRoomNum(@Ctx() ctx: BotContext): Promise<void> {
+    if (!ctx.callbackQuery || !('data' in ctx.callbackQuery)) {
+      await ctx.reply('Будь ласка, оберіть номер кімнати з кнопок вище.');
+      return;
+    }
+
+    const data = ctx.callbackQuery.data;
+    if (!data.startsWith(ROOM_NUM_PREFIX)) {
+      await answerCbQuery(ctx);
+      return;
+    }
+
+    const num = parseInt(data.replace(ROOM_NUM_PREFIX, ''), 10);
+    const state = ctx.wizard.state as RegistrationState;
+    state.roomNum = num;
+    await answerCbQuery(ctx);
+    await editMessageText(ctx, `Кімната: ${num}`);
+    await ctx.reply('Оберіть тип кімнати:', buildRoomTypeKeyboard());
+    ctx.wizard.next();
+  }
+
+  @WizardStep(7)
+  async onRoomType(@Ctx() ctx: BotContext): Promise<void> {
+    if (!ctx.callbackQuery || !('data' in ctx.callbackQuery)) {
+      await ctx.reply('Будь ласка, оберіть тип кімнати з кнопок вище.');
+      return;
+    }
+
+    const data = ctx.callbackQuery.data;
+    if (!data.startsWith(ROOM_TYPE_PREFIX)) {
+      await answerCbQuery(ctx);
+      return;
+    }
+
+    const type = data.replace(ROOM_TYPE_PREFIX, '');
+    const state = ctx.wizard.state as RegistrationState;
+    state.roomNumber = composeRoomNumber(
+      state.roomFloor!,
+      state.roomNum!,
+      type,
+    );
+    await answerCbQuery(ctx);
+    await editMessageText(ctx, `Тип: ${type} — Кімната: ${state.roomNumber}`);
 
     if (state.residentType === 'tenant') {
       await this.registrationService.initiateTenantRegistration({
@@ -148,7 +208,7 @@ export class RegistrationWizard {
     ctx.wizard.next();
   }
 
-  @WizardStep(6)
+  @WizardStep(8)
   async onEmail(@Ctx() ctx: BotContext): Promise<void> {
     if (!ctx.message || !('text' in ctx.message) || !ctx.message.text.trim()) {
       await ctx.reply('Будь ласка, введіть email.');
@@ -198,7 +258,7 @@ export class RegistrationWizard {
     }
   }
 
-  @WizardStep(7)
+  @WizardStep(9)
   async onVerificationCode(@Ctx() ctx: BotContext): Promise<void> {
     if (!ctx.message || !('text' in ctx.message) || !ctx.message.text.trim()) {
       await ctx.reply('Будь ласка, введіть код з листа.');

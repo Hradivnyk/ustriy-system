@@ -14,7 +14,7 @@ export default function DashboardLayout({
   return (
     <Layout style={{ height: '100vh' }}>
       <Header />
-      <Layout style={{ flex: 1, overflow: 'hidden' }}>
+      <Layout hasSider style={{ flex: 1, overflow: 'hidden' }}>
         <Sidebar />
         <Layout style={{ flexDirection: 'column', overflowY: 'auto' }}>
           <Layout.Content style={{ padding: 24, flex: 1 }}>{children}</Layout.Content>

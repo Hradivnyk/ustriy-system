@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   OnApplicationBootstrap,
@@ -11,6 +12,12 @@ import type { GetTicketsFilterDto } from './dto/get-tickets-filter.dto';
 import { Specialist } from './entities/specialist.entity';
 import { TicketStatus } from './entities/ticket-status.entity';
 import { Ticket } from './entities/ticket.entity';
+import { BotNotificationsService } from '../notifications/bot-notifications.service';
+import { StaffService } from '../staff/staff.service';
+
+const IN_PROGRESS_STATUS = 'в Обробці';
+const COMPLETED_STATUS = 'Виконано';
+const NEW_STATUS = 'Новий';
 
 const DEFAULT_STATUSES = [
   'Новий',
@@ -30,6 +37,8 @@ export class TicketsService implements OnApplicationBootstrap {
     private readonly statusRepository: Repository<TicketStatus>,
     @InjectRepository(Specialist)
     private readonly specialistRepository: Repository<Specialist>,
+    private readonly notifications: BotNotificationsService,
+    private readonly staffService: StaffService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -105,6 +114,8 @@ export class TicketsService implements OnApplicationBootstrap {
       .leftJoinAndSelect('ticket.specialist', 'specialist')
       .leftJoinAndSelect('ticket.status', 'status')
       .leftJoinAndSelect('ticket.dormitory', 'dormitory')
+      .leftJoinAndSelect('ticket.assignee', 'assignee')
+      .leftJoinAndSelect('assignee.specialist', 'assigneeSpecialist')
       .orderBy('ticket.createdAt', 'DESC');
 
     if (filter.dormitoryId) {
@@ -145,7 +156,11 @@ export class TicketsService implements OnApplicationBootstrap {
       .getMany();
   }
 
-  async updateStatus(id: string, statusId: number): Promise<Ticket> {
+  async updateStatus(
+    id: string,
+    statusId: number,
+    assigneeId?: string,
+  ): Promise<Ticket> {
     const ticket = await this.findById(id);
 
     const status = await this.statusRepository.findOne({
@@ -155,7 +170,68 @@ export class TicketsService implements OnApplicationBootstrap {
       throw new NotFoundException(`Статус з id=${statusId} не знайдено`);
     }
 
+    let assigneeName: string | undefined;
+
+    if (status.name === IN_PROGRESS_STATUS) {
+      if (!assigneeId) {
+        throw new BadRequestException(
+          'Для статусу «в Обробці» потрібно обрати виконавця',
+        );
+      }
+      const assignee = await this.staffService.findById(assigneeId);
+      if (!assignee || !assignee.isActive) {
+        throw new NotFoundException(`Виконавця з id=${assigneeId} не знайдено`);
+      }
+      ticket.assigneeId = assignee.id;
+      ticket.assignee = assignee;
+      assigneeName = assignee.name;
+    }
+
     ticket.statusId = statusId;
+    ticket.status = status;
+    const saved = await this.ticketRepository.save(ticket);
+
+    const telegramId = ticket.resident?.telegramId;
+    if (telegramId) {
+      if (status.name === COMPLETED_STATUS) {
+        await this.notifications.notifyCompleted(
+          telegramId,
+          saved.id,
+          saved.ticketNumber,
+        );
+      } else {
+        await this.notifications.notifyStatusChanged(
+          telegramId,
+          saved.ticketNumber,
+          status.name,
+          assigneeName,
+          ticket.description,
+          ticket.dormitory?.number,
+          ticket.createdAt,
+        );
+      }
+    }
+
+    return saved;
+  }
+
+  async setRating(ticketId: string, rating: number): Promise<Ticket> {
+    const ticket = await this.findById(ticketId);
+    ticket.rating = rating;
+    return this.ticketRepository.save(ticket);
+  }
+
+  async reopenTicket(ticketId: string): Promise<Ticket> {
+    const ticket = await this.findById(ticketId);
+
+    const newStatus = await this.statusRepository.findOne({
+      where: { name: NEW_STATUS },
+    });
+    if (!newStatus) {
+      throw new NotFoundException('Статус «Новий» не знайдено');
+    }
+
+    ticket.statusId = newStatus.id;
     return this.ticketRepository.save(ticket);
   }
 }

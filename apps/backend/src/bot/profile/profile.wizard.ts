@@ -9,6 +9,15 @@ import type { BotContext } from '../bot.context';
 import { MAIN_MENU_SCENE_ID } from '../main-menu/main-menu.wizard';
 import { answerCbQuery } from '../utils/answer-cb-query';
 import { editMessageText } from '../utils/edit-message-text';
+import {
+  ROOM_FLOOR_PREFIX,
+  ROOM_NUM_PREFIX,
+  ROOM_TYPE_PREFIX,
+  buildFloorKeyboard,
+  buildRoomNumKeyboard,
+  buildRoomTypeKeyboard,
+  composeRoomNumber,
+} from '../utils/room-keyboard';
 
 export const PROFILE_SCENE_ID = 'profile';
 
@@ -125,7 +134,7 @@ export class ProfileWizard {
 
     if (cbData === EDIT_ROOM_CB) {
       state.editField = 'room';
-      await editMessageText(ctx, 'Введіть новий номер кімнати:');
+      await editMessageText(ctx, 'Оберіть поверх:', buildFloorKeyboard());
       ctx.wizard.next();
       return;
     }
@@ -201,6 +210,64 @@ export class ProfileWizard {
       return;
     }
 
+    if (state.editField === 'room') {
+      const cbData =
+        ctx.callbackQuery && 'data' in ctx.callbackQuery
+          ? ctx.callbackQuery.data
+          : null;
+
+      if (!cbData) {
+        await ctx.reply('Будь ласка, скористайтесь кнопками.');
+        return;
+      }
+
+      await answerCbQuery(ctx);
+
+      if (!state.roomFloor && cbData.startsWith(ROOM_FLOOR_PREFIX)) {
+        state.roomFloor = parseInt(cbData.replace(ROOM_FLOOR_PREFIX, ''), 10);
+        await editMessageText(
+          ctx,
+          `Поверх: ${state.roomFloor}\nОберіть номер кімнати:`,
+          buildRoomNumKeyboard(),
+        );
+        return;
+      }
+
+      if (
+        state.roomFloor &&
+        !state.roomNum &&
+        cbData.startsWith(ROOM_NUM_PREFIX)
+      ) {
+        state.roomNum = parseInt(cbData.replace(ROOM_NUM_PREFIX, ''), 10);
+        await editMessageText(
+          ctx,
+          `Поверх: ${state.roomFloor}, кімната: ${state.roomNum}\nОберіть тип кімнати:`,
+          buildRoomTypeKeyboard(),
+        );
+        return;
+      }
+
+      if (
+        state.roomFloor &&
+        state.roomNum &&
+        cbData.startsWith(ROOM_TYPE_PREFIX)
+      ) {
+        const type = cbData.replace(ROOM_TYPE_PREFIX, '');
+        const roomNumber = composeRoomNumber(
+          state.roomFloor,
+          state.roomNum,
+          type,
+        );
+        await this.residentsService.updateRoomNumber(residentId, roomNumber);
+        await editMessageText(ctx, `✅ Кімнату змінено на ${roomNumber}`);
+        await ctx.scene.leave();
+        await ctx.scene.enter(PROFILE_SCENE_ID);
+        return;
+      }
+
+      return;
+    }
+
     if (!ctx.message || !('text' in ctx.message) || !ctx.message.text.trim()) {
       await ctx.reply('Будь ласка, введіть текстове значення.');
       return;
@@ -215,18 +282,6 @@ export class ProfileWizard {
       }
       await this.residentsService.updateName(residentId, value);
       await ctx.reply("✅ Ім'я успішно змінено.");
-      await ctx.scene.leave();
-      await ctx.scene.enter(PROFILE_SCENE_ID);
-      return;
-    }
-
-    if (state.editField === 'room') {
-      if (value.length > 20) {
-        await ctx.reply('Номер кімнати занадто довгий. Спробуйте ще раз:');
-        return;
-      }
-      await this.residentsService.updateRoomNumber(residentId, value);
-      await ctx.reply('✅ Номер кімнати успішно змінено.');
       await ctx.scene.leave();
       await ctx.scene.enter(PROFILE_SCENE_ID);
       return;
