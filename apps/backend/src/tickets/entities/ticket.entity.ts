@@ -13,6 +13,7 @@ import { Specialist } from './specialist.entity';
 import { TicketStatus } from './ticket-status.entity';
 import { Dormitory } from '../../dormitories/entities/dormitory.entity';
 import { Resident } from '../../residents/entities/resident.entity';
+import { Staff } from '../../staff/entities/staff.entity';
 
 @Entity('tickets')
 export class Ticket {
@@ -53,6 +54,16 @@ export class Ticket {
 
   @Column('text')
   description!: string;
+
+  @Column({ type: 'int', nullable: true })
+  rating!: number | null;
+
+  @Column({ type: 'uuid', nullable: true })
+  assigneeId!: string | null;
+
+  @ManyToOne(() => Staff, { nullable: true, eager: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'assigneeId' })
+  assignee!: Staff | null;
 
   @CreateDateColumn()
   createdAt!: Date;

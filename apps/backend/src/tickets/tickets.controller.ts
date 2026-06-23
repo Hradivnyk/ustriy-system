@@ -28,6 +28,18 @@ export class TicketsController {
     return this.ticketsService.findAll(filter);
   }
 
+  @ApiOperation({ summary: 'Список фахівців (напрямків)' })
+  @Get('specialists')
+  findSpecialists() {
+    return this.ticketsService.findAllSpecialists();
+  }
+
+  @ApiOperation({ summary: 'Список статусів заявок' })
+  @Get('statuses')
+  findStatuses() {
+    return this.ticketsService.findAllStatuses();
+  }
+
   @ApiOperation({ summary: 'Отримати заявку за ID' })
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
@@ -42,6 +54,6 @@ export class TicketsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTicketStatusDto,
   ) {
-    return this.ticketsService.updateStatus(id, dto.statusId);
+    return this.ticketsService.updateStatus(id, dto.statusId, dto.assigneeId);
   }
 }

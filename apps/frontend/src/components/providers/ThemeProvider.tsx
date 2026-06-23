@@ -17,11 +17,11 @@ const ThemeContext = createContext<ThemeContextValue>({
 export function ThemeProvider({
   children,
 }: Readonly<{ children: React.ReactNode }>): React.JSX.Element {
-  const [mode, setMode] = useState<ThemeMode>('light');
+  const [mode, setMode] = useState<ThemeMode>('dark');
 
   useEffect(() => {
     const saved = localStorage.getItem('theme') as ThemeMode | null;
-    const initial = saved ?? 'light';
+    const initial = saved ?? 'dark';
     setMode(initial);
     document.documentElement.setAttribute('data-theme', initial);
   }, []);

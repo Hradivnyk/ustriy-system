@@ -44,6 +44,7 @@ export const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   GOOGLE_CALLBACK_URL: z.string().url().optional(),
+  ADMIN_ALLOWED_EMAIL: z.string().email().optional(),
 
   FRONTEND_URL: z.string().url().default('http://localhost:3001'),
 

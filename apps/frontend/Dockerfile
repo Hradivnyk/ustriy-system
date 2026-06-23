@@ -7,6 +7,8 @@ RUN npm ci
 FROM deps AS dev
 
 COPY . .
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3001
 CMD ["npm", "run", "dev"]
 
 FROM deps AS builder

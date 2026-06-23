@@ -4,6 +4,8 @@ export interface RegistrationState {
   residentType?: 'student' | 'tenant';
   name?: string;
   dormitoryId?: number;
+  roomFloor?: number;
+  roomNum?: number;
   roomNumber?: string;
   email?: string;
   userId?: string;
@@ -25,6 +27,8 @@ export interface TicketPaginationState {
 
 export interface ProfileEditState {
   editField?: 'name' | 'dormitory' | 'room';
+  roomFloor?: number;
+  roomNum?: number;
 }
 
 export interface BotSession extends Scenes.WizardSessionData {

@@ -28,6 +28,14 @@ interface RequestWithUser extends Request {
   user: Staff | { sub: string };
 }
 
+function resolveOAuthErrorCode(message?: string): string {
+  if (!message) return 'oauth_failed';
+  if (message.includes('not registered')) return 'not_registered';
+  if (message.includes('inactive')) return 'inactive';
+  if (message.includes('Access denied')) return 'access_denied';
+  return 'oauth_failed';
+}
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -62,7 +70,8 @@ export class AuthController {
             error: err?.message ?? err,
             hasStaff: !!staff,
           });
-          return res.redirect(`${frontendUrl}/auth/login?error=oauth_failed`);
+          const errorCode = resolveOAuthErrorCode(err?.message);
+          return res.redirect(`${frontendUrl}/auth/login?error=${errorCode}`);
         }
         const tokens = this.authService.generateTokens(staff.id);
         this.authService.setTokenCookies(res, tokens);

@@ -40,7 +40,8 @@ export class BotUpdate {
       const cbData = ctx.callbackQuery.data;
       if (
         cbData === 'resend-verification' ||
-        cbData === 'cancel-verification'
+        cbData === 'cancel-verification' ||
+        cbData.startsWith('rate:')
       ) {
         return next();
       }
