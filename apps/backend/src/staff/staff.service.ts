@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 
-import { Staff } from './entities/staff.entity';
+import { Staff, StaffRole } from './entities/staff.entity';
 
 @Injectable()
 export class StaffService {
@@ -10,6 +10,18 @@ export class StaffService {
     @InjectRepository(Staff)
     private readonly staffRepository: Repository<Staff>,
   ) {}
+
+  findAll(specialistId?: number): Promise<Staff[]> {
+    return this.staffRepository.find({
+      where: {
+        isActive: true,
+        role: StaffRole.SPECIALIST,
+        ...(specialistId !== undefined ? { specialistId } : {}),
+      },
+      relations: { specialist: true },
+      order: { name: 'ASC' },
+    });
+  }
 
   findById(id: string): Promise<Staff | null> {
     return this.staffRepository.findOneBy({ id });
@@ -20,7 +32,7 @@ export class StaffService {
   }
 
   findByEmail(email: string): Promise<Staff | null> {
-    return this.staffRepository.findOneBy({ email });
+    return this.staffRepository.findOneBy({ email: ILike(email) });
   }
 
   async linkGoogleId(staff: Staff, googleId: string): Promise<Staff> {

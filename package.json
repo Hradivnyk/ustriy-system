@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev:frontend": "npm run dev --prefix apps/frontend -- --port 3001",
+    "prod:frontend": "npm run build --prefix apps/frontend && npm run start --prefix apps/frontend",
     "dev:backend": "npm run start:dev --prefix apps/backend",
     "type-check": "tsc -p apps/frontend/tsconfig.json --noEmit && tsc -p apps/backend/tsconfig.json --noEmit",
     "lint": "eslint \"apps/**/*.{ts,tsx}\"",
@@ -16,6 +17,7 @@
     "prepare": "husky",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
+    "docker:demo": "docker compose -f docker-compose.yml -f docker-compose.demo.yml up --build",
     "docker:prod": "docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d"
   },
   "repository": {

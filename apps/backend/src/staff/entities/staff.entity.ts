@@ -2,9 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { Specialist } from '../../tickets/entities/specialist.entity';
 
 export enum StaffRole {
   SPECIALIST = 'specialist',
@@ -30,6 +34,17 @@ export class Staff {
 
   @Column({ default: true })
   isActive!: boolean;
+
+  @Column({ type: 'int', nullable: true })
+  specialistId!: number | null;
+
+  @ManyToOne(() => Specialist, {
+    nullable: true,
+    eager: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'specialistId' })
+  specialist!: Specialist | null;
 
   @CreateDateColumn()
   createdAt!: Date;

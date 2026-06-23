@@ -14,6 +14,7 @@ import { BotUpdate } from './bot.update';
 import { MainMenuWizard } from './main-menu/main-menu.wizard';
 import { OnboardingWizard } from './onboarding/onboarding.wizard';
 import { ProfileWizard } from './profile/profile.wizard';
+import { RatingUpdate } from './rating/rating.update';
 import { RegistrationService } from './registration/registration.service';
 import { RegistrationWizard } from './registration/registration.wizard';
 import { SubmitTicketWizard } from './submit-ticket/submit-ticket.wizard';
@@ -36,6 +37,7 @@ import { VerifyEmailWizard } from './verify-email/verify-email.wizard';
   ],
   providers: [
     BotUpdate,
+    RatingUpdate,
     ActiveTicketsWizard,
     MainMenuWizard,
     OnboardingWizard,
