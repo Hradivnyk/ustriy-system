@@ -171,7 +171,7 @@ jobs:
         run: npm run build --prefix apps/backend
 
       - name: Upload backend artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-dist
           path: apps/backend/dist/
@@ -201,7 +201,7 @@ jobs:
         run: npm run build --prefix apps/frontend
 
       - name: Upload frontend artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-next
           path: apps/frontend/.next/
