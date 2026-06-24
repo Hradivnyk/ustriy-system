@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Документація
+    url: https://github.com/Hradivnyk/ustriy-system/tree/main/docs
+    about: Переглянь документацію API та моделі даних перед тим, як відкривати issue.

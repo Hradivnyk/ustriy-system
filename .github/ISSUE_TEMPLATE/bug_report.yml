@@ -1,0 +1,70 @@
+name: 🐛 Звіт про помилку
+description: Повідом про баг або несподівану поведінку системи
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Дякуємо за звіт! Заповни форму якомога детальніше — це допоможе швидше виправити проблему.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Опис проблеми
+      description: Чітко і коротко опиши, що пішло не так.
+      placeholder: "Наприклад: при натисканні кнопки 'Подати заявку' нічого не відбувається..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Кроки для відтворення
+      description: Послідовність дій, після яких виникає баг.
+      placeholder: |
+        1. Відкрити сторінку '...'
+        2. Натиснути на '...'
+        3. Побачити помилку
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Очікувана поведінка
+      description: Що мало би статись замість того, що сталося?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Фактична поведінка
+      description: Що сталося насправді? Додай скріншоти або логи, якщо є.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Область системи
+      options:
+        - Frontend (адмін-панель)
+        - Backend (API)
+        - Telegram-бот
+        - Автентифікація (Google OAuth)
+        - Сповіщення (Email / Telegram)
+        - CI/CD / Деплой
+        - Інше
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Середовище
+      description: Браузер, ОС, версія Node.js тощо.
+      placeholder: |
+        - Браузер: Chrome 125
+        - ОС: Windows 11
+        - Node.js: 20.x

@@ -23,7 +23,7 @@
 **Frontend** — Next.js, Ant Design  
 **Auth** — Google OAuth 2.0, JWT  
 **Bot** — Telegraf (nestjs-telegraf)  
-**Infra** — Docker Compose, Nginx, Let's Encrypt, GitLab CI/CD
+**Infra** — Docker Compose, Nginx, Let's Encrypt, GitHub Actions
 
 ---
 
@@ -175,68 +175,75 @@ docker compose -f docker-compose.yml up -d --build
 
 ---
 
-## CI/CD (GitLab)
+## CI/CD (GitHub Actions)
 
-Пайплайн описаний у `.gitlab-ci.yml` і складається з чотирьох стейджів. Усі джоби lint/test/build використовують GitLab DAG (`needs: []`) — вони запускаються **паралельно**, не чекаючи один одного.
+Пайплайн описаний у `.github/workflows/ci-cd.yml` і складається з шести паралельних джобів + deploy.
 
 ### Схема пайплайну
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│ lint (stage: lint, паралельно)                      │
-│  • lint             — ESLint + Prettier по всьому   │
-│  • typecheck:backend  — tsc для backend             │
-│  • typecheck:frontend — tsc для frontend            │
+│ Паралельні джоби (запускаються незалежно)            │
+│  • lint             — ESLint + Prettier              │
+│  • typecheck-backend  — tsc для backend              │
+│  • typecheck-frontend — tsc для frontend             │
+│  • test-backend     — Jest unit-тести                │
+│  • build-backend    → артефакт apps/backend/dist/    │
+│  • build-frontend   → артефакт apps/frontend/.next/  │
 └─────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────┐
-│ test (stage: test, паралельно з lint)               │
-│  • test:backend — Jest unit-тести                   │
-└─────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────┐
-│ build (stage: build, паралельно з усіма вище)       │
-│  • build:backend  → артефакт apps/backend/dist/     │
-│  • build:frontend → артефакт apps/frontend/.next/   │
-└─────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────┐
-│ deploy (тільки при push до main)                    │
-│  • Чекає на всі 6 джобів вище                       │
-│  • SSH на VPS → git pull → docker compose up        │
-│  • Виконує міграції БД                              │
+│ deploy (тільки при push до main)                     │
+│  • Чекає на всі 6 джобів вище                        │
+│  • SSH на VPS → git pull → docker compose up         │
+│  • Виконує міграції БД                               │
 └─────────────────────────────────────────────────────┘
 ```
 
 **Тригери:**
 - Будь-який push до будь-якої гілки — запускає lint / test / build.
 - Push до `main` — додатково запускає `deploy`.
-- При відкритому MR — запускається пайплайн типу `merge_request_event`; дублюючий branch-пайплайн пригнічується.
+- При відкритому PR — запускається пайплайн; дублюючий push-пайплайн скасовується (`concurrency`).
 
-### GitLab CI/CD Variables
+### GitHub Secrets
 
-Налаштовуються в **Settings → CI/CD → Variables**. Усі змінні повинні бути **Protected** + **Masked**.
+Налаштовуються в **Settings → Secrets and variables → Actions → New repository secret**.
+Усі змінні обов'язкові для роботи deploy-джобу.
 
-| Змінна | Опис | Як отримати |
+| Секрет | Опис | Як отримати |
 |--------|------|-------------|
-| `SSH_PRIVATE_KEY` | Ed25519 приватний ключ для deploy-користувача на VPS | `ssh-keygen -t ed25519 -C "gitlab-ci"` |
+| `SSH_PRIVATE_KEY` | Ed25519 приватний ключ для deploy-користувача на VPS | `ssh-keygen -t ed25519 -C "github-actions"` |
 | `SSH_KNOWN_HOSTS` | Відбиток хосту VPS | `ssh-keyscan -H $SSH_HOST` |
 | `SSH_HOST` | IP-адреса або домен VPS | — |
 | `SSH_USER` | Deploy-користувач на VPS (не root) | — |
 | `DEPLOY_PATH` | Абсолютний шлях до клону репозиторію на VPS | напр. `/opt/ustriy-system` |
-| `DEPLOY_DOMAIN` | Домен для GitLab Environments (необов'язково) | напр. `yourdomain.com` |
+| `DEPLOY_DOMAIN` | Домен для GitHub Environments URL | напр. `yourdomain.com` |
 
 #### Налаштування SSH-доступу на VPS
 
 ```bash
-# 1. Згенерувати ключову пару (локально або в CI)
-ssh-keygen -t ed25519 -C "gitlab-ci" -f ~/.ssh/gitlab_deploy
+# 1. Згенерувати ключову пару (локально)
+ssh-keygen -t ed25519 -C "github-actions" -f ~/.ssh/github_deploy
 
 # 2. Додати публічний ключ до authorized_keys на VPS
-ssh-copy-id -i ~/.ssh/gitlab_deploy.pub $SSH_USER@$SSH_HOST
+ssh-copy-id -i ~/.ssh/github_deploy.pub $SSH_USER@$SSH_HOST
 
 # 3. Отримати SSH_KNOWN_HOSTS
 ssh-keyscan -H $SSH_HOST
 
-# 4. Вміст gitlab_deploy (приватний ключ) → змінна SSH_PRIVATE_KEY в GitLab
+# 4. Вміст github_deploy (приватний ключ) → секрет SSH_PRIVATE_KEY в GitHub
 ```
+
+### GitHub Environment
+
+Deployment environment `production` налаштовується в **Settings → Environments**.
+Можна додати required reviewers — тоді деплой потребуватиме ручного підтвердження.
+
+### Branch Protection
+
+Для захисту `main` налаштуй в **Settings → Branches → Add branch ruleset**:
+- ✅ Require a pull request before merging
+- ✅ Require status checks: `lint`, `typecheck-backend`, `typecheck-frontend`, `test-backend`, `build-backend`, `build-frontend`
+- ✅ Require branches to be up to date before merging
 
 ---
 

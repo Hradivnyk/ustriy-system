@@ -1,0 +1,247 @@
+# CI/CD pipeline for ustriy-system monorepo
+#
+# Jobs in the "quality" group run in parallel (no dependencies between them).
+# Deploy runs only on push to main, after all quality gates pass.
+#
+# Required GitHub Secrets (Settings → Secrets and variables → Actions):
+#   SSH_PRIVATE_KEY  — ed25519 private key for the deploy user on VPS
+#   SSH_KNOWN_HOSTS  — output of: ssh-keyscan -H $SSH_HOST
+#   SSH_HOST         — VPS IP or domain
+#   SSH_USER         — deploy user on VPS (not root)
+#   DEPLOY_PATH      — absolute path to the repo clone on VPS (e.g. /opt/ustriy-system)
+#   DEPLOY_DOMAIN    — domain used in the GitHub Environment URL
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+# Cancel in-progress runs for the same ref when a new push arrives
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── lint ────────────────────────────────────────────────────────────────────
+
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    container: node:20-alpine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache root node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: root-deps-${{ hashFiles('package-lock.json') }}
+          restore-keys: root-deps-
+
+      - name: Cache backend node_modules
+        uses: actions/cache@v4
+        with:
+          path: apps/backend/node_modules
+          key: backend-deps-${{ hashFiles('apps/backend/package-lock.json') }}
+          restore-keys: backend-deps-
+
+      - name: Cache frontend node_modules
+        uses: actions/cache@v4
+        with:
+          path: apps/frontend/node_modules
+          key: frontend-deps-${{ hashFiles('apps/frontend/package-lock.json') }}
+          restore-keys: frontend-deps-
+
+      - name: Install dependencies
+        # All three node_modules required: root ESLint uses projectService: true
+        # (type-aware rules) which needs both apps' tsconfigs and their @types.
+        run: |
+          npm ci --prefer-offline --no-audit
+          npm ci --prefer-offline --no-audit --prefix apps/backend
+          npm ci --prefer-offline --no-audit --prefix apps/frontend
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+  # ── typecheck ───────────────────────────────────────────────────────────────
+
+  typecheck-backend:
+    name: Typecheck (backend)
+    runs-on: ubuntu-latest
+    container: node:20-alpine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache backend node_modules
+        uses: actions/cache@v4
+        with:
+          path: apps/backend/node_modules
+          key: backend-deps-${{ hashFiles('apps/backend/package-lock.json') }}
+          restore-keys: backend-deps-
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit --prefix apps/backend
+
+      - name: Run type-check
+        run: npm run type-check --prefix apps/backend
+
+  typecheck-frontend:
+    name: Typecheck (frontend)
+    runs-on: ubuntu-latest
+    container: node:20-alpine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache frontend node_modules
+        uses: actions/cache@v4
+        with:
+          path: apps/frontend/node_modules
+          key: frontend-deps-${{ hashFiles('apps/frontend/package-lock.json') }}
+          restore-keys: frontend-deps-
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit --prefix apps/frontend
+
+      - name: Run type-check
+        run: npm run type-check --prefix apps/frontend
+
+  # ── test ────────────────────────────────────────────────────────────────────
+
+  test-backend:
+    name: Test (backend)
+    runs-on: ubuntu-latest
+    container: node:20-alpine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache backend node_modules
+        uses: actions/cache@v4
+        with:
+          path: apps/backend/node_modules
+          key: backend-deps-${{ hashFiles('apps/backend/package-lock.json') }}
+          restore-keys: backend-deps-
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit --prefix apps/backend
+
+      - name: Run tests
+        run: npm test --prefix apps/backend
+
+  # ── build ───────────────────────────────────────────────────────────────────
+
+  build-backend:
+    name: Build (backend)
+    runs-on: ubuntu-latest
+    container: node:20-alpine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache backend node_modules
+        uses: actions/cache@v4
+        with:
+          path: apps/backend/node_modules
+          key: backend-deps-${{ hashFiles('apps/backend/package-lock.json') }}
+          restore-keys: backend-deps-
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit --prefix apps/backend
+
+      - name: Build
+        run: npm run build --prefix apps/backend
+
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: apps/backend/dist/
+          retention-days: 7
+
+  build-frontend:
+    name: Build (frontend)
+    runs-on: ubuntu-latest
+    container: node:20-alpine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache frontend node_modules
+        uses: actions/cache@v4
+        with:
+          path: apps/frontend/node_modules
+          key: frontend-deps-${{ hashFiles('apps/frontend/package-lock.json') }}
+          restore-keys: frontend-deps-
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit --prefix apps/frontend
+
+      - name: Build
+        run: npm run build --prefix apps/frontend
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-next
+          path: apps/frontend/.next/
+          retention-days: 7
+
+  # ── deploy ──────────────────────────────────────────────────────────────────
+
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - typecheck-backend
+      - typecheck-frontend
+      - test-backend
+      - build-backend
+      - build-frontend
+    # Deploy only on direct push to main (not on PRs)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://${{ secrets.DEPLOY_DOMAIN }}
+    steps:
+      - name: Set up SSH
+        run: |
+          eval $(ssh-agent -s)
+          install -m 600 /dev/null ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          ssh-add ~/.ssh/id_ed25519
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy via SSH
+        run: |
+          ssh "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" "
+            set -e
+            cd '${{ secrets.DEPLOY_PATH }}'
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose -f docker-compose.yml up -d --build
+            docker compose -f docker-compose.yml exec -T backend npm run migration:run || true
+          "

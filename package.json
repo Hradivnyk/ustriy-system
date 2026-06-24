@@ -22,16 +22,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@gitlab.com/sholudyvyy-group/ustriy-system.git"
+    "url": "git+https://github.com/Hradivnyk/ustriy-system.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://gitlab.com/sholudyvyy-group/ustriy-system/issues"
+    "url": "https://github.com/Hradivnyk/ustriy-system/issues"
   },
-  "homepage": "https://gitlab.com/sholudyvyy-group/ustriy-system#readme",
+  "homepage": "https://github.com/Hradivnyk/ustriy-system#readme",
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "@next/eslint-plugin-next": "^16.2.4",

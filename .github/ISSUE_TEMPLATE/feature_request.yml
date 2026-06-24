@@ -1,0 +1,53 @@
+name: ✨ Запит на нову функцію
+description: Запропонуй нову можливість або покращення системи
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Маєш ідею для покращення системи? Розкажи!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Яку проблему вирішує ця функція?
+      description: Опиши контекст і проблему, яка існує зараз.
+      placeholder: "Наприклад: зараз адміністратор не бачить статистику по виконаних заявках за місяць..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Запропоноване рішення
+      description: Як ти бачиш цю функцію? Опиши бажану поведінку.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативи
+      description: Чи розглядав(ла) інші підходи до вирішення цієї проблеми?
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Область системи
+      options:
+        - Frontend (адмін-панель)
+        - Backend (API)
+        - Telegram-бот
+        - Автентифікація
+        - Сповіщення
+        - Інфраструктура / DevOps
+        - Документація
+        - Інше
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Додаткова інформація
+      description: Скріншоти, приклади з інших систем, макети тощо.

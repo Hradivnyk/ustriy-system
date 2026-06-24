@@ -1,0 +1,18 @@
+# CODEOWNERS
+# Визначає автоматичних рев'юерів для різних частин репозиторію.
+# Документація: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Власник за замовчуванням для всього репозиторію
+*                          @Hradivnyk
+
+# Backend
+apps/backend/              @Hradivnyk
+
+# Frontend
+apps/frontend/             @Hradivnyk
+
+# Інфраструктура та CI
+.github/                   @Hradivnyk
+docker-compose*.yml        @Hradivnyk
+nginx/                     @Hradivnyk
+scripts/                   @Hradivnyk
